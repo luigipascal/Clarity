@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Clarity Engine</title>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #0a0a0b; --bg-surface: #141416; --bg-elevated: #1c1c1f; --bg-hover: #242428;
+            --border: #2a2a2f; --border-subtle: #1f1f24;
+            --text-primary: #f5f5f4; --text-secondary: #a1a1a6; --text-muted: #636366;
+            --accent-clarity: #e8c547; --accent-prerequisite: #7dd3fc; --accent-assumption: #f472b6;
+            --accent-handover: #a78bfa; --accent-constraint: #fb923c; --accent-collision: #4ade80;
+            --accent-resurrector: #f87171; --accent-inverse: #60a5fa;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'DM Sans', sans-serif; background: var(--bg-deep); color: var(--text-primary); min-height: 100vh; }
+        .app { display: grid; grid-template-columns: 240px 1fr 280px; min-height: 100vh; }
+        
+        /* Sidebar */
+        .sidebar { background: var(--bg-surface); border-right: 1px solid var(--border-subtle); padding: 24px 0; display: flex; flex-direction: column; }
+        .logo { padding: 0 18px; margin-bottom: 32px; }
+        .logo h1 { font-family: 'Instrument Serif', serif; font-size: 20px; font-weight: 400; }
+        .logo span { color: var(--accent-clarity); }
+        .logo p { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+        .nav-section { margin-bottom: 24px; }
+        .nav-title { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); padding: 0 18px; margin-bottom: 8px; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 18px; cursor: pointer; border-left: 2px solid transparent; transition: all 0.15s; }
+        .nav-item:hover { background: var(--bg-hover); }
+        .nav-item.active { background: var(--bg-elevated); border-left-color: var(--accent-clarity); }
+        .nav-item .icon { width: 26px; height: 26px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 11px; }
+        .nav-item[data-mode="prerequisite"] .icon { background: rgba(125,211,252,0.15); color: var(--accent-prerequisite); }
+        .nav-item[data-mode="assumption"] .icon { background: rgba(244,114,182,0.15); color: var(--accent-assumption); }
+        .nav-item[data-mode="handover"] .icon { background: rgba(167,139,250,0.15); color: var(--accent-handover); }
+        .nav-item[data-mode="constraint"] .icon { background: rgba(251,146,60,0.15); color: var(--accent-constraint); }
+        .nav-item[data-mode="collision"] .icon { background: rgba(74,222,128,0.15); color: var(--accent-collision); }
+        .nav-item[data-mode="resurrector"] .icon { background: rgba(248,113,113,0.15); color: var(--accent-resurrector); }
+        .nav-item[data-mode="inverse"] .icon { background: rgba(96,165,250,0.15); color: var(--accent-inverse); }
+        .nav-item[data-mode="graph"] .icon { background: rgba(232,197,71,0.15); color: var(--accent-clarity); }
+        .nav-item .label { font-size: 12px; color: var(--text-secondary); }
+        .nav-item.active .label { color: var(--text-primary); }
+        .nav-item .badge { margin-left: auto; font-size: 9px; padding: 2px 5px; background: var(--bg-hover); border-radius: 8px; color: var(--text-muted); }
+        .sidebar-footer { margin-top: auto; padding: 16px; border-top: 1px solid var(--border-subtle); }
+        .ai-toggle { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: var(--bg-elevated); border-radius: 6px; cursor: pointer; font-size: 11px; color: var(--text-secondary); }
+        
+        /* Main */
+        .main { padding: 32px; overflow-y: auto; max-height: 100vh; }
+        .panel { display: none; animation: fadeIn 0.2s ease; }
+        .panel.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .header { margin-bottom: 24px; }
+        .header h2 { font-family: 'Instrument Serif', serif; font-size: 28px; font-weight: 400; margin-bottom: 4px; }
+        .header p { font-size: 13px; color: var(--text-secondary); max-width: 500px; }
+        
+        /* Right Panel */
+        .right { background: var(--bg-surface); border-left: 1px solid var(--border-subtle); padding: 20px 16px; overflow-y: auto; }
+        .panel-title { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 14px; }
+        .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+        .stat { background: var(--bg-elevated); border-radius: 6px; padding: 10px; text-align: center; }
+        .stat-val { font-family: 'JetBrains Mono', monospace; font-size: 20px; }
+        .stat-label { font-size: 8px; color: var(--text-muted); text-transform: uppercase; }
+        
+        /* Cards */
+        .card { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 18px; margin-bottom: 16px; }
+        .card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+        .card-title { font-size: 12px; font-weight: 500; }
+        .card-badge { font-size: 9px; padding: 3px 7px; background: var(--bg-elevated); border-radius: 12px; color: var(--text-muted); }
+        
+        /* Inputs */
+        .input-group { margin-bottom: 14px; }
+        .input-label { font-size: 10px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 5px; display: block; }
+        .text-input { width: 100%; padding: 10px 12px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 6px; font-family: inherit; font-size: 12px; color: var(--text-primary); }
+        .text-input:focus { outline: none; border-color: var(--accent-clarity); }
+        .text-input::placeholder { color: var(--text-muted); }
+        textarea.text-input { min-height: 80px; resize: vertical; }
+        select.text-input { cursor: pointer; }
+        
+        /* Buttons */
+        .btn { display: inline-flex; align-items: center; gap: 5px; padding: 8px 14px; border-radius: 6px; font-family: inherit; font-size: 11px; font-weight: 500; cursor: pointer; border: none; transition: all 0.15s; }
+        .btn-primary { background: var(--accent-clarity); color: var(--bg-deep); }
+        .btn-primary:hover { background: #f0d05a; }
+        .btn-secondary { background: var(--bg-elevated); color: var(--text-primary); border: 1px solid var(--border); }
+        .btn-ghost { background: transparent; color: var(--text-secondary); padding: 5px 8px; }
+        .btn-ghost:hover { color: var(--text-primary); }
+        
+        /* Tree */
+        .tree { background: var(--bg-elevated); border-radius: 8px; padding: 14px; min-height: 120px; }
+        .tree-node { padding: 8px 12px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 5px; margin-bottom: 5px; display: flex; align-items: center; gap: 8px; }
+        .tree-node.l1 { margin-left: 20px; }
+        .tree-node.l2 { margin-left: 40px; }
+        .tree-node.l3 { margin-left: 60px; }
+        .tree-node:hover { border-color: var(--accent-prerequisite); }
+        .tree-status { width: 7px; height: 7px; border-radius: 50%; background: var(--text-muted); cursor: pointer; flex-shrink: 0; }
+        .tree-status.complete { background: var(--accent-collision); }
+        .tree-status.blocked { background: var(--accent-resurrector); }
+        .tree-status.in-progress { background: var(--accent-constraint); }
+        .tree-text { flex: 1; font-size: 12px; }
+        .tree-actions { display: flex; gap: 3px; opacity: 0; transition: opacity 0.15s; }
+        .tree-node:hover .tree-actions { opacity: 1; }
+        .tree-btn { width: 22px; height: 22px; border-radius: 4px; border: none; background: var(--bg-elevated); color: var(--text-muted); cursor: pointer; font-size: 10px; display: flex; align-items: center; justify-content: center; }
+        .tree-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+        .tree-tags { display: flex; gap: 4px; margin-top: 5px; flex-wrap: wrap; }
+        .tree-tag { font-size: 8px; padding: 2px 5px; border-radius: 3px; }
+        .tree-tag.assumption { background: rgba(244,114,182,0.15); color: var(--accent-assumption); }
+        .tree-tag.antigoal { background: rgba(96,165,250,0.15); color: var(--accent-inverse); }
+        
+        /* List Items */
+        .list-item { display: flex; gap: 10px; padding: 12px; background: var(--bg-elevated); border-radius: 6px; margin-bottom: 6px; }
+        .list-item:hover { background: var(--bg-hover); }
+        .list-icon { width: 24px; height: 24px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; }
+        .list-item.assumption .list-icon { background: rgba(244,114,182,0.15); color: var(--accent-assumption); }
+        .list-item.fragment .list-icon { background: rgba(248,113,113,0.15); color: var(--accent-resurrector); }
+        .list-item.antigoal .list-icon { background: rgba(96,165,250,0.15); color: var(--accent-inverse); }
+        .list-item.knowledge .list-icon { background: rgba(167,139,250,0.15); color: var(--accent-handover); }
+        .list-item.collision .list-icon { background: rgba(74,222,128,0.15); color: var(--accent-collision); }
+        .list-content { flex: 1; min-width: 0; }
+        .list-text { font-size: 12px; margin-bottom: 3px; line-height: 1.4; }
+        .list-meta { font-size: 9px; color: var(--text-muted); display: flex; gap: 8px; }
+        .list-links { margin-top: 6px; display: flex; gap: 4px; flex-wrap: wrap; }
+        .link-tag { font-size: 8px; padding: 2px 5px; background: var(--bg-surface); border-radius: 3px; color: var(--text-muted); }
+        .list-actions { display: flex; gap: 3px; }
+        
+        /* Constraint */
+        .constraint-box { text-align: center; padding: 28px; background: linear-gradient(135deg, var(--bg-elevated), var(--bg-surface)); border-radius: 12px; margin-bottom: 16px; }
+        .constraint-level { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-constraint); margin-bottom: 10px; }
+        .constraint-text { font-family: 'Instrument Serif', serif; font-size: 18px; font-style: italic; max-width: 380px; margin: 0 auto 16px; line-height: 1.4; }
+        .constraint-timer { font-family: 'JetBrains Mono', monospace; font-size: 32px; color: var(--accent-constraint); margin-bottom: 6px; }
+        .constraint-bar { width: 140px; height: 3px; background: var(--border); border-radius: 2px; margin: 0 auto; overflow: hidden; }
+        .constraint-fill { height: 100%; background: var(--accent-constraint); transition: width 0.1s linear; }
+        .domain-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+        .domain-btn { padding: 12px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 6px; text-align: center; cursor: pointer; }
+        .domain-btn:hover { border-color: var(--accent-constraint); }
+        .domain-icon { font-size: 16px; margin-bottom: 3px; }
+        .domain-label { font-size: 10px; color: var(--text-secondary); }
+        
+        /* Collision */
+        .collision-box { display: grid; grid-template-columns: 1fr auto 1fr; gap: 14px; align-items: center; margin-bottom: 16px; }
+        .collision-domain { padding: 20px; background: var(--bg-elevated); border-radius: 10px; text-align: center; }
+        .collision-label { font-size: 8px; font-weight: 600; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
+        .collision-text { font-family: 'Instrument Serif', serif; font-size: 16px; }
+        .collision-spark { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--accent-collision), var(--accent-prerequisite)); display: flex; align-items: center; justify-content: center; font-size: 16px; }
+        
+        /* Interview */
+        .interview-q { padding: 16px; background: linear-gradient(135deg, rgba(167,139,250,0.1), transparent); border-radius: 8px; border-left: 3px solid var(--accent-handover); margin-bottom: 14px; }
+        .interview-text { font-family: 'Instrument Serif', serif; font-size: 16px; font-style: italic; margin-bottom: 3px; }
+        .interview-context { font-size: 10px; color: var(--text-muted); }
+        
+        /* Empty */
+        .empty { text-align: center; padding: 32px 16px; }
+        .empty-icon { width: 40px; height: 40px; border-radius: 10px; background: var(--bg-elevated); display: flex; align-items: center; justify-content: center; font-size: 16px; margin: 0 auto 10px; color: var(--text-muted); }
+        .empty-title { font-size: 12px; font-weight: 500; color: var(--text-secondary); margin-bottom: 3px; }
+        .empty-text { font-size: 11px; color: var(--text-muted); }
+        
+        /* Activity Card */
+        .activity-card { background: var(--bg-elevated); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; border-left: 3px solid var(--border); cursor: pointer; }
+        .activity-card:hover { background: var(--bg-hover); }
+        .activity-card.prerequisite { border-left-color: var(--accent-prerequisite); }
+        .activity-card.assumption { border-left-color: var(--accent-assumption); }
+        .activity-card.fragment { border-left-color: var(--accent-resurrector); }
+        .activity-card.collision { border-left-color: var(--accent-collision); }
+        .activity-card.antigoal { border-left-color: var(--accent-inverse); }
+        .activity-card.knowledge { border-left-color: var(--accent-handover); }
+        .activity-type { font-size: 8px; font-weight: 600; text-transform: uppercase; color: var(--text-muted); margin-bottom: 2px; }
+        .activity-text { font-size: 11px; line-height: 1.3; margin-bottom: 3px; }
+        .activity-meta { font-size: 9px; color: var(--text-muted); }
+        
+        /* Suggestion */
+        .suggestion { background: linear-gradient(135deg, rgba(232,197,71,0.1), rgba(232,197,71,0.02)); border: 1px solid rgba(232,197,71,0.2); border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+        .suggestion-title { font-size: 10px; font-weight: 600; color: var(--accent-clarity); margin-bottom: 3px; }
+        .suggestion-text { font-size: 11px; color: var(--text-secondary); line-height: 1.3; }
+        
+        /* Toast */
+        .toast-box { position: fixed; bottom: 16px; right: 16px; z-index: 200; }
+        .toast { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; margin-top: 6px; display: flex; align-items: center; gap: 8px; animation: slideIn 0.2s ease; max-width: 240px; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: translateX(0); } }
+        .toast-icon { width: 20px; height: 20px; border-radius: 4px; background: rgba(232,197,71,0.15); color: var(--accent-clarity); display: flex; align-items: center; justify-content: center; font-size: 9px; }
+        .toast-content { flex: 1; }
+        .toast-title { font-size: 11px; font-weight: 500; }
+        .toast-text { font-size: 10px; color: var(--text-muted); }
+        
+        @media (max-width: 1000px) { .app { grid-template-columns: 220px 1fr; } .right { display: none; } }
+        @media (max-width: 600px) { .app { grid-template-columns: 1fr; } .sidebar { display: none; } .main { padding: 16px; } }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    </style>
+</head>
+<body>
+<div class="app">
+    <aside class="sidebar">
+        <div class="logo"><h1>Clarity <span>Engine</span></h1><p>Think once. Build right.</p></div>
+        <nav>
+            <div class="nav-section">
+                <div class="nav-title">Systems</div>
+                <div class="nav-item active" data-mode="prerequisite" onclick="switchMode('prerequisite')"><div class="icon">⬡</div><span class="label">Prerequisites</span><span class="badge" id="n-prereq">0</span></div>
+                <div class="nav-item" data-mode="assumption" onclick="switchMode('assumption')"><div class="icon">◇</div><span class="label">Assumptions</span><span class="badge" id="n-assum">0</span></div>
+                <div class="nav-item" data-mode="handover" onclick="switchMode('handover')"><div class="icon">⇄</div><span class="label">Handover</span><span class="badge" id="n-know">0</span></div>
+            </div>
+            <div class="nav-section">
+                <div class="nav-title">Creativity</div>
+                <div class="nav-item" data-mode="constraint" onclick="switchMode('constraint')"><div class="icon">◎</div><span class="label">Constraints</span></div>
+                <div class="nav-item" data-mode="collision" onclick="switchMode('collision')"><div class="icon">✧</div><span class="label">Collisions</span><span class="badge" id="n-coll">0</span></div>
+                <div class="nav-item" data-mode="resurrector" onclick="switchMode('resurrector')"><div class="icon">↻</div><span class="label">Fragments</span><span class="badge" id="n-frag">0</span></div>
+            </div>
+            <div class="nav-section">
+                <div class="nav-title">Hybrid</div>
+                <div class="nav-item" data-mode="inverse" onclick="switchMode('inverse')"><div class="icon">⊘</div><span class="label">Inverse Brief</span><span class="badge" id="n-anti">0</span></div>
+            </div>
+            <div class="nav-section">
+                <div class="nav-title">Overview</div>
+                <div class="nav-item" data-mode="graph" onclick="switchMode('graph')"><div class="icon">◈</div><span class="label">Clarity Graph</span></div>
+            </div>
+        </nav>
+        <div class="sidebar-footer"><div class="ai-toggle" onclick="this.classList.toggle('active')">AI Enhancement</div></div>
+    </aside>
+    
+    <main class="main">
+        <!-- Prerequisites -->
+        <div class="panel active" id="p-prerequisite">
+            <div class="header"><h2>Prerequisite Mapper</h2><p>Surface the true foundations through recursive decomposition.</p></div>
+            <div class="card">
+                <div class="card-head"><span class="card-title">Define Goal</span></div>
+                <div class="input-group"><input type="text" class="text-input" id="goal-in" placeholder="e.g., Launch treasury reporting module by Q2"></div>
+                <div style="display:flex;gap:6px"><button class="btn btn-primary" onclick="addGoal()">Begin Mapping →</button><button class="btn btn-secondary" onclick="aiDecompose()" id="ai-decompose-btn">✨ AI Decompose</button></div>
+            </div>
+            <div id="tree-section" style="display:none">
+                <div class="card">
+                    <div class="card-head"><span class="card-title">Dependency Tree</span><span class="card-badge" id="tree-depth">Depth: 0</span></div>
+                    <div class="tree" id="tree-box"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Assumptions -->
+        <div class="panel" id="p-assumption">
+            <div class="header"><h2>Assumption Register</h2><p>Make invisible beliefs explicit.</p></div>
+            <div class="card">
+                <div class="card-head"><span class="card-title">Log Assumption</span></div>
+                <div class="input-group"><textarea class="text-input" id="assum-in" placeholder="e.g., API response time stays under 200ms..."></textarea></div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                    <div class="input-group"><label class="input-label">Trigger</label><select class="text-input" id="assum-trigger"><option value="monthly">Monthly</option><option value="event">Event</option><option value="threshold">Threshold</option></select></div>
+                    <div class="input-group"><label class="input-label">Link to Prereq</label><select class="text-input" id="assum-link"></select></div>
+                </div>
+                <div style="display:flex;gap:6px"><button class="btn btn-primary" onclick="addAssumption()">Register</button><button class="btn btn-secondary" onclick="aiSurfaceAssumptions()" id="ai-assum-btn">✨ AI Surface Hidden</button></div>
+            </div>
+            <div class="card"><div class="card-head"><span class="card-title">Active Assumptions</span><span class="card-badge" id="assum-count">0</span></div><div id="assum-list"></div></div>
+        </div>
+        
+        <!-- Handover -->
+        <div class="panel" id="p-handover">
+            <div class="header"><h2>Handover Machine</h2><p>Extract tacit knowledge before it disappears.</p></div>
+            <div class="card">
+                <div class="card-head"><span class="card-title">Knowledge Extraction</span><span class="card-badge" id="q-num">Q1</span></div>
+                <div class="interview-q"><div class="interview-text" id="q-text">"What do you check first when something goes wrong?"</div><div class="interview-context" id="q-ctx">Captures diagnostic intuition</div></div>
+                <div class="input-group"><textarea class="text-input" id="know-in" placeholder="Record the knowledge..."></textarea></div>
+                <div class="input-group"><label class="input-label">Link to Prereq</label><select class="text-input" id="know-link"></select></div>
+                <div style="display:flex;gap:6px"><button class="btn btn-primary" onclick="saveKnowledge()">Save & Next →</button><button class="btn btn-secondary" onclick="aiGenerateQuestions()" id="ai-q-btn">✨ AI Questions</button><button class="btn btn-ghost" onclick="nextQ()">Skip</button></div>
+            </div>
+            <div class="card"><div class="card-head"><span class="card-title">Captured Knowledge</span><span class="card-badge" id="know-count">0</span></div><div id="know-list"></div></div>
+        </div>
+        
+        <!-- Constraints -->
+        <div class="panel" id="p-constraint">
+            <div class="header"><h2>Constraint Ratchet</h2><p>Tighten until you produce, then release.</p></div>
+            <div class="card" id="domain-pick">
+                <div class="card-head"><span class="card-title">Select Domain</span></div>
+                <div class="domain-grid">
+                    <div class="domain-btn" onclick="setDomain('writing')"><div class="domain-icon">✎</div><div class="domain-label">Writing</div></div>
+                    <div class="domain-btn" onclick="setDomain('design')"><div class="domain-icon">◐</div><div class="domain-label">Design</div></div>
+                    <div class="domain-btn" onclick="setDomain('code')"><div class="domain-icon">⟨⟩</div><div class="domain-label">Code</div></div>
+                    <div class="domain-btn" onclick="setDomain('problem')"><div class="domain-icon">◈</div><div class="domain-label">Problem</div></div>
+                    <div class="domain-btn" onclick="setDomain('music')"><div class="domain-icon">♪</div><div class="domain-label">Music</div></div>
+                    <div class="domain-btn" onclick="setDomain('business')"><div class="domain-icon">◭</div><div class="domain-label">Business</div></div>
+                </div>
+            </div>
+            <div id="constraint-active" style="display:none">
+                <div class="constraint-box">
+                    <div class="constraint-level" id="c-level">Level 5</div>
+                    <div class="constraint-text" id="c-text">"Constraint"</div>
+                    <div class="constraint-timer" id="c-timer">3:00</div>
+                    <div class="constraint-bar"><div class="constraint-fill" id="c-bar"></div></div>
+                </div>
+                <div class="card">
+                    <div class="card-head"><span class="card-title">Your Work</span><span class="card-badge" id="word-ct">0 words</span></div>
+                    <div class="input-group"><textarea class="text-input" id="c-output" placeholder="Create..." oninput="updateWords()"></textarea></div>
+                    <div class="input-group"><label class="input-label">Use Fragment</label><select class="text-input" id="c-frag"></select></div>
+                    <div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-primary" onclick="submitC()">Submit & Release →</button><button class="btn btn-secondary" onclick="aiEvaluateWork()" id="ai-eval-btn">✨ AI Evaluate</button><button class="btn btn-secondary" onclick="suggestFrag()">Stuck?</button><button class="btn btn-ghost" onclick="resetC()">Reset</button></div>
+                    <div id="ai-feedback" style="margin-top:10px;display:none" class="suggestion"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Collision -->
+        <div class="panel" id="p-collision">
+            <div class="header"><h2>Collision Engine</h2><p>Original ideas from unexpected combinations.</p></div>
+            <div class="card">
+                <div class="card-head"><span class="card-title">Your Challenge</span></div>
+                <div class="input-group"><textarea class="text-input" id="coll-challenge" placeholder="What are you stuck on?"></textarea></div>
+                <div class="input-group"><label class="input-label">Include Fragment</label><select class="text-input" id="coll-frag"></select></div>
+                <button class="btn btn-primary" onclick="genCollision()">Generate Collision ✧</button>
+            </div>
+            <div id="coll-result" style="display:none">
+                <div class="collision-box">
+                    <div class="collision-domain"><div class="collision-label">Your Domain</div><div class="collision-text" id="coll-yours">—</div></div>
+                    <div class="collision-spark">⚡</div>
+                    <div class="collision-domain"><div class="collision-label">Random Domain</div><div class="collision-text" id="coll-random">—</div></div>
+                </div>
+                <div class="card">
+                    <div class="card-head"><span class="card-title">Find Connection</span></div>
+                    <div class="input-group"><textarea class="text-input" id="coll-conn" placeholder="What connection can you find?"></textarea></div>
+                    <div class="input-group"><label class="input-label">Link to Prereq</label><select class="text-input" id="coll-link"></select></div>
+                    <div style="display:flex;gap:6px"><button class="btn btn-primary" onclick="saveCollision()">Save</button><button class="btn btn-secondary" onclick="aiFindConnection()" id="ai-coll-btn">✨ AI Find Connection</button><button class="btn btn-secondary" onclick="genCollision()">New</button></div>
+                </div>
+            </div>
+            <div class="card"><div class="card-head"><span class="card-title">Collision Library</span><span class="card-badge" id="coll-count">0</span></div><div id="coll-list"></div></div>
+        </div>
+        
+        <!-- Fragments -->
+        <div class="panel" id="p-resurrector">
+            <div class="header"><h2>Fragment Resurrector</h2><p>Abandoned drafts waiting for their moment.</p></div>
+            <div class="card">
+                <div class="card-head"><span class="card-title">Archive Fragment</span></div>
+                <div class="input-group"><textarea class="text-input" id="frag-in" placeholder="Paste your abandoned draft..."></textarea></div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                    <div class="input-group"><label class="input-label">Why started?</label><input type="text" class="text-input" id="frag-start" placeholder="e.g., Excited"></div>
+                    <div class="input-group"><label class="input-label">Why stopped?</label><input type="text" class="text-input" id="frag-stop" placeholder="e.g., Got stuck"></div>
+                </div>
+                <div class="input-group"><label class="input-label">Tags</label><input type="text" class="text-input" id="frag-tags" placeholder="e.g., essay, idea"></div>
+                <div style="display:flex;gap:6px"><button class="btn btn-primary" onclick="saveFrag()">Archive</button><button class="btn btn-secondary" onclick="aiAnalyzeFragment()" id="ai-frag-btn">✨ AI Analyze & Tag</button></div>
+            </div>
+            <div class="card"><div class="card-head"><span class="card-title">Your Fragments</span><span class="card-badge" id="frag-count">0</span></div><div id="frag-list"></div></div>
+        </div>
+        
+        <!-- Inverse -->
+        <div class="panel" id="p-inverse">
+            <div class="header"><h2>Inverse Brief</h2><p>Define what you refuse. The rest is more original.</p></div>
+            <div class="card">
+                <div class="card-head"><span class="card-title">Add Anti-Goal</span></div>
+                <div class="input-group"><label class="input-label">What must NOT happen?</label><div style="display:flex;gap:6px"><input type="text" class="text-input" id="anti-in" placeholder="e.g., Must not require training" style="flex:1"><button class="btn btn-primary" onclick="addAnti()">Add</button><button class="btn btn-secondary" onclick="aiSuggestAntiGoals()" id="ai-anti-btn">✨ AI Suggest</button></div></div>
+                <div class="input-group"><label class="input-label">Link to Prereq</label><select class="text-input" id="anti-link"></select></div>
+            </div>
+            <div class="card"><div class="card-head"><span class="card-title">Anti-Goals</span><span class="card-badge" id="anti-count">0</span></div><div id="anti-list"></div></div>
+            <div class="card" id="poss-space" style="display:none"><div class="card-head"><span class="card-title">Possibility Space</span><button class="btn btn-secondary" onclick="aiMapPossibilities()" id="ai-poss-btn" style="margin-left:auto">✨ AI Map</button></div><div id="poss-content"></div></div>
+        </div>
+        
+        <!-- Graph -->
+        <div class="panel" id="p-graph">
+            <div class="header"><h2>Clarity Graph</h2><p>See everything connected.</p></div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px">
+                <div class="stat"><div class="stat-val" id="g-prereq">0</div><div class="stat-label">Prerequisites</div></div>
+                <div class="stat"><div class="stat-val" id="g-assum">0</div><div class="stat-label">Assumptions</div></div>
+                <div class="stat"><div class="stat-val" id="g-frag">0</div><div class="stat-label">Fragments</div></div>
+                <div class="stat"><div class="stat-val" id="g-conn">0</div><div class="stat-label">Connections</div></div>
+            </div>
+            <div class="card"><div class="card-head"><span class="card-title">All Connections</span></div><div id="conn-list"></div></div>
+        </div>
+    </main>
+    
+    <aside class="right">
+        <div class="panel-title">Live Connections</div>
+        <div class="stats">
+            <div class="stat"><div class="stat-val" id="s-nodes">0</div><div class="stat-label">Nodes</div></div>
+            <div class="stat"><div class="stat-val" id="s-links">0</div><div class="stat-label">Links</div></div>
+        </div>
+        <div id="suggestions"></div>
+        <div class="panel-title" style="margin-top:16px">Recent Activity</div>
+        <div id="activity"></div>
+    </aside>
+</div>
+<div class="toast-box" id="toasts"></div>
+
+<script>
+// Claude API Configuration - Replace with your API key
+const CLAUDE_API_KEY = '***REMOVED***';
+const CLAUDE_MODEL = 'claude-sonnet-4-20250514';
+
+async function askClaude(systemPrompt, userPrompt, maxTokens = 1024) {
+    if (CLAUDE_API_KEY === 'YOUR_API_KEY_HERE') {
+        toast('API Key Required', 'Set your key in the code');
+        return null;
+    }
+    try {
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': CLAUDE_API_KEY,
+                'anthropic-version': '2023-06-01',
+                'anthropic-dangerous-direct-browser-access': 'true'
+            },
+            body: JSON.stringify({
+                model: CLAUDE_MODEL,
+                max_tokens: maxTokens,
+                system: systemPrompt,
+                messages: [{ role: 'user', content: userPrompt }]
+            })
+        });
+        if (!res.ok) {
+            const err = await res.json();
+            toast('API Error', err.error?.message || 'Request failed');
+            return null;
+        }
+        const data = await res.json();
+        return data.content[0].text;
+    } catch (e) {
+        toast('Error', e.message);
+        return null;
+    }
+}
+
+const G = {
+    prereqs: [], assums: [], knows: [], frags: [], colls: [], antis: [], conns: [],
+    id() { return Date.now().toString(36) + Math.random().toString(36).substr(2); },
+    link(ft, fi, tt, ti, l='') { const c = {id:this.id(),ft,fi,tt,ti,l,at:new Date()}; this.conns.push(c); this.save(); toast('Connected',ft+' → '+tt); update(); return c; },
+    linked(t, i) { return this.conns.filter(c=>(c.ft===t&&c.fi===i)||(c.tt===t&&c.ti===i)).map(c=>{ const isF=c.ft===t&&c.fi===i; const lt=isF?c.tt:c.ft; const li=isF?c.ti:c.fi; const item=this[lt+'s']?.find(x=>x.id===li); return {t:lt,item,c}; }).filter(x=>x.item); },
+    save() { localStorage.setItem('CE', JSON.stringify({prereqs:this.prereqs,assums:this.assums,knows:this.knows,frags:this.frags,colls:this.colls,antis:this.antis,conns:this.conns})); },
+    load() { const s=localStorage.getItem('CE'); if(s) Object.assign(this, JSON.parse(s)); }
+};
+
+let mode='prerequisite', timer=null, cLevel=5, qIdx=0;
+const Qs=[{q:"What do you check first when something goes wrong?",c:"Diagnostic intuition"},{q:"What would surprise your replacement?",c:"Hidden complexity"},{q:"What's undocumented but everyone knows?",c:"Tribal knowledge"},{q:"When do you break the process?",c:"Practical wisdom"}];
+const Cs={writing:["Exactly 25 words. No adjectives.","Only questions.","Every sentence 5 words."],design:["Only circles. 3 colors max.","Typography only.","Black & white only."],code:["Under 10 lines.","No conditionals.","Single function."],problem:["Use what's at arm's reach.","Opposite approach?","Explain to 5-year-old."],music:["Only 3 notes.","8 bars exactly.","Silence as instrument."],business:["Value in 10 words.","No buzzwords.","Anti-pitch."]};
+const RDs=["Beekeeping","Submarines","Medieval liturgy","Jazz","Origami","Volcanoes","Playgrounds","Sourdough","Ant colonies","Chess","Folklore","Triage","Bird migration","Bankruptcy law","Perfume"];
+
+document.addEventListener('DOMContentLoaded',()=>{ G.load(); update(); });
+
+function update() { counts(); renderTree(); renderAssums(); renderKnows(); renderFrags(); renderColls(); renderAntis(); renderAct(); renderSugg(); dropdowns(); renderQ(); updatePoss(); if(mode==='graph') renderGraph(); }
+function switchMode(m) { document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active')); document.querySelector(`[data-mode="${m}"]`).classList.add('active'); document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active')); document.getElementById('p-'+m).classList.add('active'); mode=m; renderSugg(); if(m==='graph') renderGraph(); }
+function counts() { document.getElementById('n-prereq').textContent=G.prereqs.length; document.getElementById('n-assum').textContent=G.assums.length; document.getElementById('n-know').textContent=G.knows.length; document.getElementById('n-frag').textContent=G.frags.length; document.getElementById('n-coll').textContent=G.colls.length; document.getElementById('n-anti').textContent=G.antis.length; document.getElementById('assum-count').textContent=G.assums.length; document.getElementById('know-count').textContent=G.knows.length; document.getElementById('frag-count').textContent=G.frags.length; document.getElementById('coll-count').textContent=G.colls.length; document.getElementById('anti-count').textContent=G.antis.length; const tot=G.prereqs.length+G.assums.length+G.knows.length+G.frags.length+G.colls.length+G.antis.length; document.getElementById('s-nodes').textContent=tot; document.getElementById('s-links').textContent=G.conns.length; }
+function dropdowns() { const opts='<option value="">None</option>'+G.prereqs.map(p=>`<option value="${p.id}">${trunc(p.text,30)}</option>`).join(''); ['assum-link','know-link','coll-link','anti-link'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerHTML=opts;}); const fOpts='<option value="">None</option>'+G.frags.map(f=>`<option value="${f.id}">${trunc(f.text,30)}</option>`).join(''); ['c-frag','coll-frag'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerHTML=fOpts;}); }
+function trunc(s,n) { return s&&s.length>n?s.slice(0,n)+'...':s||''; }
+function timeAgo(d) { const s=Math.floor((new Date()-new Date(d))/1000); if(s<60)return 'now'; const m=Math.floor(s/60); if(m<60)return m+'m'; const h=Math.floor(m/60); if(h<24)return h+'h'; return Math.floor(h/24)+'d'; }
+function toast(t,x) { const c=document.getElementById('toasts'); const d=document.createElement('div'); d.className='toast'; d.innerHTML=`<div class="toast-icon">◈</div><div class="toast-content"><div class="toast-title">${t}</div>${x?`<div class="toast-text">${x}</div>`:''}</div>`; c.appendChild(d); setTimeout(()=>{d.style.opacity='0';setTimeout(()=>d.remove(),300);},3000); }
+
+// Prerequisites
+function addGoal() { const i=document.getElementById('goal-in'); const t=i.value.trim(); if(!t)return; G.prereqs.push({id:G.id(),text:t,level:0,status:'in-progress',pid:null,at:new Date()}); G.save(); i.value=''; document.getElementById('tree-section').style.display='block'; update(); toast('Goal created','Add prerequisites now'); }
+
+async function aiDecompose() {
+    const i=document.getElementById('goal-in'); const goal=i.value.trim();
+    if(!goal){ toast('Enter a goal',''); return; }
+    const btn=document.getElementById('ai-decompose-btn'); btn.disabled=true; btn.textContent='Thinking...';
+    const sys=`You are an expert at breaking down goals into prerequisites. For any goal, identify 3-5 things that MUST be true or in place BEFORE the goal can be achieved. Be specific and actionable. Return ONLY a JSON array of strings, no explanation.`;
+    const res = await askClaude(sys, `Goal: "${goal}"\n\nWhat must be true first?`);
+    btn.disabled=false; btn.textContent='✨ AI Decompose';
+    if(!res) return;
+    try {
+        const prereqs = JSON.parse(res.replace(/```json\n?|\n?```/g, ''));
+        const rootId = G.id();
+        G.prereqs.push({id:rootId,text:goal,level:0,status:'in-progress',pid:null,at:new Date()});
+        prereqs.forEach(p => G.prereqs.push({id:G.id(),text:p,level:1,status:'',pid:rootId,at:new Date()}));
+        G.save(); i.value=''; document.getElementById('tree-section').style.display='block'; update();
+        toast('AI Decomposed', prereqs.length + ' prerequisites found');
+    } catch(e) { toast('Parse Error', 'Could not parse AI response'); console.log(res); }
+}
+
+async function aiExpandNode(pid) {
+    const p = G.prereqs.find(x=>x.id===pid);
+    if(!p) return;
+    toast('Expanding...', p.text);
+    const ctx = G.prereqs.filter(x=>x.level===0).map(x=>x.text).join(', ');
+    const sys=`You are an expert at recursive decomposition. Given a prerequisite, identify 2-4 sub-prerequisites that must be true BEFORE this one can be achieved. Be specific. Return ONLY a JSON array of strings.`;
+    const res = await askClaude(sys, `Main goal context: ${ctx}\n\nPrerequisite to decompose: "${p.text}"\n\nWhat must be true first?`);
+    if(!res) return;
+    try {
+        const subs = JSON.parse(res.replace(/```json\n?|\n?```/g, ''));
+        subs.forEach(s => G.prereqs.push({id:G.id(),text:s,level:p.level+1,status:'',pid:pid,at:new Date()}));
+        G.save(); update();
+        toast('Expanded', subs.length + ' sub-prerequisites');
+    } catch(e) { toast('Parse Error', ''); console.log(res); }
+}
+function addChild(pid) { const p=G.prereqs.find(x=>x.id===pid); const t=prompt('What must be true first?'); if(t){ G.prereqs.push({id:G.id(),text:t,level:p.level+1,status:'',pid,at:new Date()}); G.save(); update(); } }
+function cycleS(id) { const p=G.prereqs.find(x=>x.id===id); const ss=['','in-progress','complete','blocked']; p.status=ss[(ss.indexOf(p.status)+1)%ss.length]; if(p.status==='complete'&&confirm('Add assumption?')) promptAssum(id); G.save(); update(); }
+function promptAssum(pid) { const p=G.prereqs.find(x=>x.id===pid); const t=prompt('Assumption underlying "'+trunc(p.text,30)+'"?'); if(t){ const a={id:G.id(),text:t,trigger:'monthly',status:'active',at:new Date()}; G.assums.push(a); G.link('assum',a.id,'prereq',pid,'underlies'); } }
+function renderTree() { const box=document.getElementById('tree-box'); const roots=G.prereqs.filter(p=>p.level===0); if(!roots.length){ box.innerHTML='<div class="empty"><div class="empty-icon">⬡</div><div class="empty-title">No goals</div></div>'; document.getElementById('tree-section').style.display='none'; return; } document.getElementById('tree-section').style.display='block'; let h=''; roots.forEach(r=>h+=renderNode(r)); box.innerHTML=h; document.getElementById('tree-depth').textContent='Depth: '+Math.max(...G.prereqs.map(p=>p.level)); }
+function renderNode(n) { const ch=G.prereqs.filter(p=>p.pid===n.id); const lks=G.linked('prereq',n.id); const tags=lks.map(l=>l.t==='assum'?`<span class="tree-tag assumption">◇ ${trunc(l.item.text,12)}</span>`:l.t==='anti'?`<span class="tree-tag antigoal">⊘ ${trunc(l.item.text,12)}</span>`:'' ).join(''); let h=`<div class="tree-node l${n.level}"><div class="tree-status ${n.status}" onclick="cycleS('${n.id}')"></div><span class="tree-text">${n.text}</span><div class="tree-actions"><button class="tree-btn" onclick="addChild('${n.id}')" title="Add prereq">+</button><button class="tree-btn" onclick="aiExpandNode('${n.id}')" title="AI expand">✨</button><button class="tree-btn" onclick="promptAssum('${n.id}')" title="Add assumption">◇</button></div></div>`; if(tags) h=h.replace('</div></div>',`</div>${tags?`<div class="tree-tags">${tags}</div>`:''}` + '</div>'); ch.forEach(c=>h+=renderNode(c)); return h; }
+
+// Assumptions
+function addAssumption() { const t=document.getElementById('assum-in').value.trim(); if(!t)return; const tr=document.getElementById('assum-trigger').value; const lk=document.getElementById('assum-link').value; const a={id:G.id(),text:t,trigger:tr,status:'active',at:new Date()}; G.assums.push(a); if(lk) G.link('assum',a.id,'prereq',lk,'underlies'); G.save(); document.getElementById('assum-in').value=''; update(); toast('Assumption added',lk?'Linked':''); }
+
+async function aiSurfaceAssumptions() {
+    if(!G.prereqs.length){ toast('Add prerequisites first',''); return; }
+    const btn=document.getElementById('ai-assum-btn'); btn.disabled=true; btn.textContent='Analyzing...';
+    const prereqList = G.prereqs.map(p => `- ${p.text}`).join('\n');
+    const existingAssums = G.assums.map(a => a.text).join(', ') || 'None yet';
+    const sys=`You are an expert at surfacing hidden assumptions. Given a list of goals/prerequisites, identify 3-5 HIDDEN assumptions that people typically don't realize they're making. Focus on:
+- Resource assumptions (time, money, people)
+- Technical assumptions (systems work, integrations exist)
+- Environmental assumptions (market conditions, regulations)
+- Human assumptions (skills, availability, motivation)
+Return ONLY a JSON array of objects with "text" (the assumption) and "prereq" (which prerequisite it relates to most, exact match from list).`;
+    const res = await askClaude(sys, `Prerequisites:\n${prereqList}\n\nExisting assumptions: ${existingAssums}\n\nWhat hidden assumptions underlie these?`);
+    btn.disabled=false; btn.textContent='✨ AI Surface Hidden';
+    if(!res) return;
+    try {
+        const assumptions = JSON.parse(res.replace(/```json\n?|\n?```/g, ''));
+        assumptions.forEach(a => {
+            const newA = {id:G.id(),text:a.text,trigger:'monthly',status:'active',at:new Date()};
+            G.assums.push(newA);
+            const linkedPrereq = G.prereqs.find(p => p.text === a.prereq || p.text.includes(a.prereq) || a.prereq.includes(p.text));
+            if(linkedPrereq) G.link('assum',newA.id,'prereq',linkedPrereq.id,'underlies');
+        });
+        G.save(); update();
+        toast('Assumptions Surfaced', assumptions.length + ' hidden assumptions found');
+    } catch(e) { toast('Parse Error', ''); console.log(res); }
+}
+function breakA(id) { const a=G.assums.find(x=>x.id===id); a.status='broken'; G.linked('assum',id).forEach(l=>{if(l.t==='prereq')l.item.status='blocked';}); G.save(); update(); toast('Assumption broken','Prerequisites blocked'); }
+function renderAssums() { const c=document.getElementById('assum-list'); if(!G.assums.length){ c.innerHTML='<div class="empty"><div class="empty-icon">◇</div><div class="empty-title">No assumptions</div></div>'; return; } const trs={monthly:'⏱',event:'🎯',threshold:'📊'}; c.innerHTML=G.assums.map(a=>{ const lks=G.linked('assum',a.id).map(l=>`<span class="link-tag">⬡ ${trunc(l.item.text,10)}</span>`).join(''); return `<div class="list-item assumption"><div class="list-icon">◇</div><div class="list-content"><div class="list-text">${a.text}</div><div class="list-meta"><span>${trs[a.trigger]} ${a.trigger}</span><span>${a.status}</span></div>${lks?`<div class="list-links">${lks}</div>`:''}</div><div class="list-actions"><button class="btn btn-ghost" onclick="breakA('${a.id}')">Break</button></div></div>`; }).join(''); }
+
+// Handover
+let customQs = [];
+function renderQ() { const allQs = [...Qs, ...customQs]; const q=allQs[qIdx % allQs.length]; document.getElementById('q-text').textContent='"'+q.q+'"'; document.getElementById('q-ctx').textContent=q.c; document.getElementById('q-num').textContent='Q'+(qIdx+1)+'/'+allQs.length; }
+function nextQ() { const allQs = [...Qs, ...customQs]; qIdx=(qIdx+1)%allQs.length; renderQ(); }
+function saveKnowledge() { const t=document.getElementById('know-in').value.trim(); if(!t)return; const lk=document.getElementById('know-link').value; const allQs = [...Qs, ...customQs]; const k={id:G.id(),text:t,q:allQs[qIdx % allQs.length].q,at:new Date()}; G.knows.push(k); if(lk) G.link('know',k.id,'prereq',lk,'informs'); G.save(); document.getElementById('know-in').value=''; nextQ(); update(); toast('Knowledge saved',''); }
+function renderKnows() { const c=document.getElementById('know-list'); if(!G.knows.length){ c.innerHTML='<div class="empty"><div class="empty-icon">⇄</div><div class="empty-title">No knowledge</div></div>'; return; } c.innerHTML=G.knows.map(k=>`<div class="list-item knowledge"><div class="list-icon">⇄</div><div class="list-content"><div class="list-text">${k.text}</div><div class="list-meta"><span>Q: ${trunc(k.q,20)}</span></div></div></div>`).join(''); }
+
+async function aiGenerateQuestions() {
+    const btn=document.getElementById('ai-q-btn'); btn.disabled=true; btn.textContent='Generating...';
+    const prereqCtx = G.prereqs.length ? G.prereqs.map(p => p.text).join(', ') : 'General project';
+    const existingKnowledge = G.knows.map(k => k.text).join('; ') || 'None captured yet';
+    const sys=`You are an expert at knowledge extraction and handover interviews. Generate 4-6 probing questions that would extract tacit knowledge from someone leaving a project. Questions should uncover:
+- Undocumented decisions and their reasoning
+- Workarounds and gotchas
+- Key relationships and dependencies
+- Emergency procedures
+- Things that "just work" but nobody knows why
+Return ONLY a JSON array of objects with "q" (question) and "c" (what it captures, 2-3 words).`;
+    const res = await askClaude(sys, `Project context: ${prereqCtx}\nAlready captured: ${existingKnowledge}\n\nGenerate contextual handover questions.`);
+    btn.disabled=false; btn.textContent='✨ AI Questions';
+    if(!res) return;
+    try {
+        customQs = JSON.parse(res.replace(/```json\n?|\n?```/g, ''));
+        qIdx = Qs.length; // Jump to first custom question
+        renderQ(); update();
+        toast('Questions Generated', customQs.length + ' custom questions added');
+    } catch(e) { toast('Parse Error', ''); console.log(res); }
+}
+
+// Constraints
+function setDomain(d) { cLevel=5; document.getElementById('c-text').textContent='"'+Cs[d][0]+'"'; document.getElementById('c-level').textContent='Level 5'; document.getElementById('domain-pick').style.display='none'; document.getElementById('constraint-active').style.display='block'; dropdowns(); startTimer(180); }
+function startTimer(s) { if(timer)clearInterval(timer); let r=s; timer=setInterval(()=>{ r--; document.getElementById('c-timer').textContent=Math.floor(r/60)+':'+(r%60).toString().padStart(2,'0'); document.getElementById('c-bar').style.width=(r/s*100)+'%'; if(r<=0)clearInterval(timer); },1000); }
+function updateWords() { const t=document.getElementById('c-output').value; document.getElementById('word-ct').textContent=(t.trim()?t.trim().split(/\s+/).length:0)+' words'; }
+function submitC() { if(cLevel>1){ cLevel--; document.getElementById('c-level').textContent='Level '+cLevel; startTimer(180+(5-cLevel)*60); toast('Released','Level '+cLevel); } }
+function suggestFrag() { if(G.frags.length){ const f=G.frags[Math.floor(Math.random()*G.frags.length)]; document.getElementById('c-frag').value=f.id; toast('Fragment suggested',''); } }
+function resetC() { document.getElementById('domain-pick').style.display='block'; document.getElementById('constraint-active').style.display='none'; document.getElementById('c-output').value=''; document.getElementById('ai-feedback').style.display='none'; if(timer)clearInterval(timer); }
+
+async function aiEvaluateWork() {
+    const work = document.getElementById('c-output').value.trim();
+    const constraint = document.getElementById('c-text').textContent;
+    if(!work){ toast('Write something first',''); return; }
+    const btn=document.getElementById('ai-eval-btn'); btn.disabled=true; btn.textContent='Evaluating...';
+    const sys=`You are a creative writing coach evaluating work against a specific constraint. Be encouraging but honest. Provide:
+1. Does it meet the constraint? (Yes/Partially/No)
+2. What works well (1 sentence)
+3. One specific improvement suggestion
+Keep response under 80 words. Be direct and helpful.`;
+    const res = await askClaude(sys, `Constraint: ${constraint}\n\nWork submitted:\n"${work}"\n\nEvaluate this work.`);
+    btn.disabled=false; btn.textContent='✨ AI Evaluate';
+    if(!res) return;
+    const fb = document.getElementById('ai-feedback');
+    fb.innerHTML = `<div class="suggestion-title">AI Feedback</div><div class="suggestion-text">${res}</div>`;
+    fb.style.display = 'block';
+}
+
+// Collision
+function genCollision() { const ch=document.getElementById('coll-challenge').value.trim(); if(!ch)return; document.getElementById('coll-yours').textContent=ch.split(' ').slice(0,3).join(' '); document.getElementById('coll-random').textContent=RDs[Math.floor(Math.random()*RDs.length)]; document.getElementById('coll-result').style.display='block'; }
+function saveCollision() { const cn=document.getElementById('coll-conn').value.trim(); if(!cn)return; const lk=document.getElementById('coll-link').value; const c={id:G.id(),yours:document.getElementById('coll-yours').textContent,random:document.getElementById('coll-random').textContent,conn:cn,at:new Date()}; G.colls.push(c); if(lk) G.link('coll',c.id,'prereq',lk,'inspires'); G.save(); document.getElementById('coll-conn').value=''; update(); toast('Collision saved',''); }
+
+async function aiFindConnection() {
+    const yours = document.getElementById('coll-yours').textContent;
+    const random = document.getElementById('coll-random').textContent;
+    const challenge = document.getElementById('coll-challenge').value.trim();
+    if(yours === '—' || !random){ toast('Generate a collision first',''); return; }
+    const btn=document.getElementById('ai-coll-btn'); btn.disabled=true; btn.textContent='Thinking...';
+    const sys=`You are a creative thinker who finds unexpected connections between unrelated domains. Given two domains, find 2-3 surprising but useful connections. Be specific and actionable, not abstract. Focus on:
+- Structural similarities (how things are organized)
+- Process parallels (how things work)
+- Metaphorical bridges (what one teaches about the other)
+Keep each connection to 1-2 sentences. Be creative but practical.`;
+    const res = await askClaude(sys, `Challenge: ${challenge}\n\nDomain 1: ${yours}\nDomain 2: ${random}\n\nWhat surprising connections can you find that might help solve the challenge?`);
+    btn.disabled=false; btn.textContent='✨ AI Find Connection';
+    if(!res) return;
+    document.getElementById('coll-conn').value = res;
+    toast('Connections Found', 'Review and save');
+}
+function renderColls() { const c=document.getElementById('coll-list'); if(!G.colls.length){ c.innerHTML='<div class="empty"><div class="empty-icon">✧</div><div class="empty-title">No collisions</div></div>'; return; } c.innerHTML=G.colls.map(x=>`<div class="list-item collision"><div class="list-icon">✧</div><div class="list-content"><div class="list-text">${x.conn}</div><div class="list-meta"><span>${x.yours} × ${x.random}</span></div></div></div>`).join(''); }
+
+// Fragments
+function saveFrag() { const t=document.getElementById('frag-in').value.trim(); if(!t)return; G.frags.push({id:G.id(),text:t,start:document.getElementById('frag-start').value,stop:document.getElementById('frag-stop').value,tags:document.getElementById('frag-tags').value.split(',').map(x=>x.trim()).filter(x=>x),at:new Date()}); G.save(); document.getElementById('frag-in').value=''; document.getElementById('frag-start').value=''; document.getElementById('frag-stop').value=''; document.getElementById('frag-tags').value=''; update(); toast('Fragment archived',''); }
+function renderFrags() { const c=document.getElementById('frag-list'); if(!G.frags.length){ c.innerHTML='<div class="empty"><div class="empty-icon">↻</div><div class="empty-title">No fragments</div></div>'; return; } c.innerHTML=G.frags.map(f=>{ const tags=f.tags.map(t=>`<span class="link-tag">${t}</span>`).join(''); return `<div class="list-item fragment"><div class="list-icon">↻</div><div class="list-content"><div class="list-text">${trunc(f.text,80)}</div><div class="list-meta"><span>Start: ${f.start||'?'}</span><span>Stop: ${f.stop||'?'}</span></div>${tags?`<div class="list-links">${tags}</div>`:''}</div><div class="list-actions"><button class="btn btn-ghost" onclick="aiReviveFrag('${f.id}')">✨ Revive</button><button class="btn btn-ghost" onclick="useFrag('${f.id}')">Use</button></div></div>`; }).join(''); }
+function useFrag(id) { switchMode('collision'); setTimeout(()=>document.getElementById('coll-frag').value=id,100); }
+
+async function aiAnalyzeFragment() {
+    const text = document.getElementById('frag-in').value.trim();
+    if(!text){ toast('Enter a fragment first',''); return; }
+    const btn=document.getElementById('ai-frag-btn'); btn.disabled=true; btn.textContent='Analyzing...';
+    const sys=`You are an expert at analyzing abandoned creative work. Given a fragment, identify:
+1. What type of work this is (essay, story, code, idea, etc.)
+2. Why it might have stalled (2-3 words)
+3. 3-5 relevant tags for categorization
+Return ONLY a JSON object with "type", "stalled_reason", and "tags" (array).`;
+    const res = await askClaude(sys, `Analyze this fragment:\n\n"${text}"`);
+    btn.disabled=false; btn.textContent='✨ AI Analyze & Tag';
+    if(!res) return;
+    try {
+        const analysis = JSON.parse(res.replace(/```json\n?|\n?```/g, ''));
+        document.getElementById('frag-start').value = analysis.type || '';
+        document.getElementById('frag-stop').value = analysis.stalled_reason || '';
+        document.getElementById('frag-tags').value = (analysis.tags || []).join(', ');
+        toast('Analyzed', 'Review and archive');
+    } catch(e) { toast('Parse Error', ''); console.log(res); }
+}
+
+async function aiReviveFrag(id) {
+    const f = G.frags.find(x=>x.id===id);
+    if(!f) return;
+    toast('Thinking...', 'How to revive this');
+    const prereqCtx = G.prereqs.length ? 'Current goals: ' + G.prereqs.filter(p=>p.level===0).map(p=>p.text).join(', ') : '';
+    const sys=`You are a creative coach helping resurrect abandoned work. Given a fragment and why it stalled, suggest 2-3 specific, actionable ways to continue or repurpose it. Be practical and encouraging. Keep response under 100 words.`;
+    const res = await askClaude(sys, `Fragment: "${trunc(f.text, 200)}"\n\nStarted because: ${f.start || 'Unknown'}\nStopped because: ${f.stop || 'Unknown'}\nTags: ${f.tags.join(', ') || 'None'}\n\n${prereqCtx}\n\nHow can this be revived or repurposed?`);
+    if(!res) return;
+    alert('Revival Ideas:\n\n' + res);
+}
+
+// Inverse
+function addAnti() { const t=document.getElementById('anti-in').value.trim(); if(!t)return; const lk=document.getElementById('anti-link').value; const a={id:G.id(),text:t,at:new Date()}; G.antis.push(a); if(lk) G.link('anti',a.id,'prereq',lk,'constrains'); G.save(); document.getElementById('anti-in').value=''; update(); toast('Anti-goal added',''); }
+function delAnti(id) { G.antis=G.antis.filter(a=>a.id!==id); G.conns=G.conns.filter(c=>!(c.ft==='anti'&&c.fi===id)&&!(c.tt==='anti'&&c.ti===id)); G.save(); update(); }
+
+async function aiSuggestAntiGoals() {
+    if(!G.prereqs.length){ toast('Add prerequisites first',''); return; }
+    const btn=document.getElementById('ai-anti-btn'); btn.disabled=true; btn.textContent='Thinking...';
+    const prereqList = G.prereqs.map(p => p.text).join(', ');
+    const existingAntis = G.antis.map(a => a.text).join(', ') || 'None yet';
+    const sys=`You are an expert at inverse thinking - defining what must NOT happen to clarify what should. Given goals/prerequisites, suggest 4-5 anti-goals that would:
+- Protect quality (what corners must not be cut)
+- Preserve values (what principles must not be violated)
+- Avoid common failure modes
+- Distinguish from competitors/alternatives
+Return ONLY a JSON array of strings.`;
+    const res = await askClaude(sys, `Goals/Prerequisites: ${prereqList}\n\nExisting anti-goals: ${existingAntis}\n\nWhat must NOT happen?`);
+    btn.disabled=false; btn.textContent='✨ AI Suggest';
+    if(!res) return;
+    try {
+        const antis = JSON.parse(res.replace(/```json\n?|\n?```/g, ''));
+        antis.forEach(a => G.antis.push({id:G.id(),text:a,at:new Date()}));
+        G.save(); update();
+        toast('Anti-goals Added', antis.length + ' suggestions');
+    } catch(e) { toast('Parse Error', ''); console.log(res); }
+}
+
+async function aiMapPossibilities() {
+    if(G.antis.length < 2){ toast('Add more anti-goals','Need at least 2'); return; }
+    const btn=document.getElementById('ai-poss-btn'); btn.disabled=true; btn.textContent='Mapping...';
+    const antiList = G.antis.map(a => '- Must NOT: ' + a.text).join('\n');
+    const prereqCtx = G.prereqs.length ? 'Goals: ' + G.prereqs.filter(p=>p.level===0).map(p=>p.text).join(', ') : '';
+    const sys=`You are a strategic thinker who maps possibility spaces. Given a set of anti-goals (what must NOT happen), derive:
+1. The positive space that remains (what IS possible)
+2. 3-4 specific solution directions that respect all constraints
+3. One unexpected approach that emerges from the constraints
+Be specific and actionable. Format with clear headers.`;
+    const res = await askClaude(sys, `${prereqCtx}\n\nAnti-goals:\n${antiList}\n\nMap the possibility space.`);
+    btn.disabled=false; btn.textContent='✨ AI Map';
+    if(!res) return;
+    const ct = document.getElementById('poss-content');
+    ct.innerHTML = `<div style="white-space:pre-wrap;font-size:12px;line-height:1.5;color:var(--text-secondary)">${res}</div>`;
+    document.getElementById('poss-space').style.display = 'block';
+    toast('Possibilities Mapped', '');
+}
+function renderAntis() { const c=document.getElementById('anti-list'); if(!G.antis.length){ c.innerHTML='<div class="empty"><div class="empty-icon">⊘</div><div class="empty-title">No anti-goals</div></div>'; return; } c.innerHTML=G.antis.map(a=>{ const lks=G.linked('anti',a.id).map(l=>`<span class="link-tag">⬡ ${trunc(l.item.text,10)}</span>`).join(''); return `<div class="list-item antigoal"><div class="list-icon">✕</div><div class="list-content"><div class="list-text">${a.text}</div>${lks?`<div class="list-links">${lks}</div>`:''}</div><div class="list-actions"><button class="btn btn-ghost" onclick="delAnti('${a.id}')">×</button></div></div>`; }).join(''); }
+function updatePoss() { const c=document.getElementById('poss-space'); const ct=document.getElementById('poss-content'); if(G.antis.length<2){ c.style.display='none'; return; } c.style.display='block'; const inv=G.antis.map(a=>{ let t=a.text; if(t.toLowerCase().includes('must not'))t=t.replace(/must not/i,'must'); else if(t.toLowerCase().includes('no '))t=t.replace(/no /i,''); else if(t.toLowerCase().includes("don't"))t=t.replace(/don't/i,'do'); else t='NOT: '+t; return t; }); ct.innerHTML=`<p style="color:var(--text-secondary);margin-bottom:10px">Given ${G.antis.length} anti-goals, solution must:</p><ul style="padding-left:16px;line-height:1.6">${inv.map(i=>`<li>${i}</li>`).join('')}</ul>`; }
+
+// Graph
+function renderGraph() { document.getElementById('g-prereq').textContent=G.prereqs.length; document.getElementById('g-assum').textContent=G.assums.length; document.getElementById('g-frag').textContent=G.frags.length; document.getElementById('g-conn').textContent=G.conns.length; const c=document.getElementById('conn-list'); if(!G.conns.length){ c.innerHTML='<div class="empty"><div class="empty-icon">◈</div><div class="empty-title">No connections</div></div>'; return; } c.innerHTML=G.conns.map(cn=>{ const f=G[cn.ft+'s']?.find(x=>x.id===cn.fi); const t=G[cn.tt+'s']?.find(x=>x.id===cn.ti); if(!f||!t)return''; return `<div class="list-item"><div class="list-content"><div class="list-text"><strong>${cn.ft}</strong> → <strong>${cn.tt}</strong> ${cn.l?'('+cn.l+')':''}</div><div class="list-meta"><span>${trunc(f.text||f.conn,20)}</span><span>→</span><span>${trunc(t.text,20)}</span></div></div></div>`; }).filter(x=>x).join(''); }
+
+// Suggestions
+function renderSugg() { const c=document.getElementById('suggestions'); const s=[]; const noA=G.prereqs.filter(p=>!G.conns.some(cn=>(cn.tt==='prereq'&&cn.ti===p.id&&cn.ft==='assum'))); if(noA.length&&mode==='prerequisite') s.push({t:'Surface Assumptions',x:noA.length+' prereq(s) without assumptions'}); if(G.frags.length&&mode==='constraint') s.push({t:'Use Fragment',x:G.frags.length+' fragment(s) available'}); if(G.antis.length>=3&&mode==='inverse') s.push({t:'Map Possibility',x:'Enough anti-goals to derive space'}); c.innerHTML=s.map(x=>`<div class="suggestion"><div class="suggestion-title">💡 ${x.t}</div><div class="suggestion-text">${x.x}</div></div>`).join(''); }
+
+// Activity
+function renderAct() { const c=document.getElementById('activity'); const all=[ ...G.prereqs.map(p=>({t:'prerequisite',i:p,d:new Date(p.at)})), ...G.assums.map(a=>({t:'assumption',i:a,d:new Date(a.at)})), ...G.knows.map(k=>({t:'knowledge',i:k,d:new Date(k.at)})), ...G.frags.map(f=>({t:'fragment',i:f,d:new Date(f.at)})), ...G.colls.map(x=>({t:'collision',i:x,d:new Date(x.at)})), ...G.antis.map(a=>({t:'antigoal',i:a,d:new Date(a.at)})) ].sort((a,b)=>b.d-a.d).slice(0,5); if(!all.length){ c.innerHTML='<div class="empty" style="padding:16px"><div class="empty-text">No activity</div></div>'; return; } const icons={prerequisite:'⬡',assumption:'◇',knowledge:'⇄',fragment:'↻',collision:'✧',antigoal:'⊘'}; c.innerHTML=all.map(a=>`<div class="activity-card ${a.t}"><div class="activity-type">${icons[a.t]} ${a.t}</div><div class="activity-text">${trunc(a.i.text||a.i.conn||'',40)}</div><div class="activity-meta">${timeAgo(a.d)}</div></div>`).join(''); }
+</script>
+</body>
+</html>
