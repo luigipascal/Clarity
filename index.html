@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clarity Engine - AI-Powered Thinking Tool</title>
+    <meta name="description" content="Think once. Build right. An AI-powered tool to break down goals, surface hidden assumptions, and think more clearly.">
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0b;
+            --surface: #141416;
+            --text: #f5f5f4;
+            --text-secondary: #a1a1a6;
+            --accent: #e8c547;
+            --blue: #7dd3fc;
+            --pink: #f472b6;
+            --green: #4ade80;
+            --orange: #fb923c;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+        /* Header */
+        header { padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; }
+        .logo { font-family: 'Instrument Serif', serif; font-size: 24px; }
+        .logo span { color: var(--accent); }
+        nav { display: flex; gap: 32px; align-items: center; }
+        nav a { color: var(--text-secondary); text-decoration: none; font-size: 14px; transition: color 0.2s; }
+        nav a:hover { color: var(--text); }
+        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; text-decoration: none; transition: all 0.2s; cursor: pointer; border: none; }
+        .btn-primary { background: var(--accent); color: var(--bg); }
+        .btn-primary:hover { background: #f0d05a; transform: translateY(-1px); }
+        .btn-secondary { background: transparent; color: var(--text); border: 1px solid #333; }
+        .btn-secondary:hover { border-color: var(--accent); }
+
+        /* Hero */
+        .hero { text-align: center; padding: 100px 40px 80px; max-width: 900px; margin: 0 auto; }
+        .hero h1 { font-family: 'Instrument Serif', serif; font-size: 64px; font-weight: 400; line-height: 1.1; margin-bottom: 24px; }
+        .hero h1 span { color: var(--accent); }
+        .hero p { font-size: 20px; color: var(--text-secondary); max-width: 600px; margin: 0 auto 40px; }
+        .hero-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+        .hero-note { margin-top: 24px; font-size: 13px; color: var(--text-secondary); }
+
+        /* Features */
+        .features { padding: 80px 40px; max-width: 1200px; margin: 0 auto; }
+        .features h2 { font-family: 'Instrument Serif', serif; font-size: 40px; text-align: center; margin-bottom: 16px; }
+        .features > p { text-align: center; color: var(--text-secondary); margin-bottom: 60px; }
+        .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+        .feature { background: var(--surface); border-radius: 16px; padding: 32px; border: 1px solid #1f1f24; }
+        .feature-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 20px; }
+        .feature h3 { font-size: 18px; margin-bottom: 8px; }
+        .feature p { font-size: 14px; color: var(--text-secondary); }
+        .feature.prereq .feature-icon { background: rgba(125,211,252,0.15); color: var(--blue); }
+        .feature.assumption .feature-icon { background: rgba(244,114,182,0.15); color: var(--pink); }
+        .feature.handover .feature-icon { background: rgba(167,139,250,0.15); color: #a78bfa; }
+        .feature.constraint .feature-icon { background: rgba(251,146,60,0.15); color: var(--orange); }
+        .feature.collision .feature-icon { background: rgba(74,222,128,0.15); color: var(--green); }
+        .feature.inverse .feature-icon { background: rgba(96,165,250,0.15); color: #60a5fa; }
+        .feature.fragment .feature-icon { background: rgba(248,113,113,0.15); color: #f87171; }
+
+        /* How it works */
+        .how { padding: 80px 40px; background: var(--surface); }
+        .how-inner { max-width: 900px; margin: 0 auto; }
+        .how h2 { font-family: 'Instrument Serif', serif; font-size: 40px; text-align: center; margin-bottom: 60px; }
+        .steps { display: grid; gap: 40px; }
+        .step { display: flex; gap: 24px; align-items: flex-start; }
+        .step-num { width: 40px; height: 40px; background: var(--accent); color: var(--bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; flex-shrink: 0; }
+        .step-content h3 { font-size: 18px; margin-bottom: 4px; }
+        .step-content p { color: var(--text-secondary); font-size: 14px; }
+
+        /* AI Section */
+        .ai-section { padding: 80px 40px; max-width: 1200px; margin: 0 auto; }
+        .ai-section h2 { font-family: 'Instrument Serif', serif; font-size: 40px; text-align: center; margin-bottom: 16px; }
+        .ai-section > p { text-align: center; color: var(--text-secondary); margin-bottom: 40px; }
+        .providers { display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; }
+        .provider { text-align: center; padding: 24px; background: var(--surface); border-radius: 12px; min-width: 150px; }
+        .provider-logo { font-size: 32px; margin-bottom: 8px; }
+        .provider-name { font-size: 14px; color: var(--text-secondary); }
+
+        /* Pricing */
+        .pricing { padding: 80px 40px; background: var(--surface); }
+        .pricing-inner { max-width: 600px; margin: 0 auto; text-align: center; }
+        .pricing h2 { font-family: 'Instrument Serif', serif; font-size: 40px; margin-bottom: 16px; }
+        .pricing > p { color: var(--text-secondary); margin-bottom: 40px; }
+        .price-card { background: linear-gradient(135deg, rgba(232,197,71,0.1), rgba(232,197,71,0.02)); border: 1px solid rgba(232,197,71,0.3); border-radius: 16px; padding: 40px; }
+        .price-label { font-size: 14px; color: var(--accent); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+        .price { font-family: 'Instrument Serif', serif; font-size: 48px; margin-bottom: 8px; }
+        .price-note { color: var(--text-secondary); font-size: 14px; margin-bottom: 24px; }
+        .price-features { text-align: left; margin-bottom: 24px; }
+        .price-features li { padding: 8px 0; color: var(--text-secondary); font-size: 14px; list-style: none; }
+        .price-features li::before { content: "✓"; color: var(--green); margin-right: 12px; }
+
+        /* CTA */
+        .cta { padding: 100px 40px; text-align: center; }
+        .cta h2 { font-family: 'Instrument Serif', serif; font-size: 48px; margin-bottom: 16px; }
+        .cta p { color: var(--text-secondary); font-size: 18px; margin-bottom: 32px; }
+
+        /* Footer */
+        footer { padding: 40px; text-align: center; border-top: 1px solid #1f1f24; }
+        footer p { color: var(--text-secondary); font-size: 13px; }
+        footer a { color: var(--accent); text-decoration: none; }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 40px; }
+            header { padding: 16px 20px; flex-direction: column; gap: 16px; }
+            nav { gap: 16px; }
+            .features, .how, .ai-section, .pricing, .cta { padding: 60px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">Clarity <span>Engine</span></div>
+        <nav>
+            <a href="#features">Features</a>
+            <a href="#how">How It Works</a>
+            <a href="#pricing">Pricing</a>
+            <a href="clarity-engine-v2.html" class="btn btn-primary">Launch App →</a>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <h1>Think once.<br><span>Build right.</span></h1>
+        <p>An AI-powered thinking tool that helps you break down goals, surface hidden assumptions, and create clarity before you create chaos.</p>
+        <div class="hero-buttons">
+            <a href="clarity-engine-v2.html" class="btn btn-primary">Launch Clarity Engine →</a>
+            <a href="#features" class="btn btn-secondary">See Features</a>
+        </div>
+        <p class="hero-note">Free & open source. Bring your own AI key (OpenAI, Anthropic, or Google).</p>
+    </section>
+
+    <section class="features" id="features">
+        <h2>Seven Thinking Modules</h2>
+        <p>Each module tackles a different thinking challenge, powered by AI.</p>
+        <div class="feature-grid">
+            <div class="feature prereq">
+                <div class="feature-icon">⬡</div>
+                <h3>Prerequisite Mapper</h3>
+                <p>Break any goal into what must be true first. AI recursively decomposes until you hit actionable foundations.</p>
+            </div>
+            <div class="feature assumption">
+                <div class="feature-icon">◇</div>
+                <h3>Assumption Register</h3>
+                <p>Surface the hidden beliefs you didn't know you were making. AI finds resource, technical, and human assumptions.</p>
+            </div>
+            <div class="feature handover">
+                <div class="feature-icon">⇄</div>
+                <h3>Handover Machine</h3>
+                <p>Extract tacit knowledge before it walks out the door. AI generates probing interview questions.</p>
+            </div>
+            <div class="feature constraint">
+                <div class="feature-icon">◎</div>
+                <h3>Constraint Ratchet</h3>
+                <p>Creativity under pressure. Timed challenges with escalating constraints. AI evaluates your output.</p>
+            </div>
+            <div class="feature collision">
+                <div class="feature-icon">✧</div>
+                <h3>Collision Engine</h3>
+                <p>Spark original ideas by colliding your problem with random domains. AI finds unexpected connections.</p>
+            </div>
+            <div class="feature fragment">
+                <div class="feature-icon">↻</div>
+                <h3>Fragment Resurrector</h3>
+                <p>Abandoned drafts deserve a second life. Archive them, and AI suggests how to revive them later.</p>
+            </div>
+            <div class="feature inverse">
+                <div class="feature-icon">⊘</div>
+                <h3>Inverse Brief</h3>
+                <p>Define by exclusion. State what must NOT happen, and AI maps the remaining possibility space.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="how" id="how">
+        <div class="how-inner">
+            <h2>How It Works</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-num">1</div>
+                    <div class="step-content">
+                        <h3>Add your AI key</h3>
+                        <p>Go to Settings and add your OpenAI, Anthropic (Claude), or Google (Gemini) API key. Your key is stored locally in your browser - we never see it.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num">2</div>
+                    <div class="step-content">
+                        <h3>Define your goal</h3>
+                        <p>Start with the Prerequisite Mapper. Enter what you're trying to achieve and let AI break it down into foundations.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num">3</div>
+                    <div class="step-content">
+                        <h3>Surface blind spots</h3>
+                        <p>Use Assumptions to find hidden beliefs. Use Inverse Brief to define constraints. Use Collisions to spark new ideas.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num">4</div>
+                    <div class="step-content">
+                        <h3>Export your clarity</h3>
+                        <p>Generate an AI summary report, export to Markdown, or create a visual PDF. Share with your team or keep for reference.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="ai-section">
+        <h2>Powered by Your Choice of AI</h2>
+        <p>Use any major AI provider. Bring your own API key.</p>
+        <div class="providers">
+            <div class="provider">
+                <div class="provider-logo">🟠</div>
+                <div class="provider-name">Anthropic Claude</div>
+            </div>
+            <div class="provider">
+                <div class="provider-logo">🟢</div>
+                <div class="provider-name">OpenAI GPT</div>
+            </div>
+            <div class="provider">
+                <div class="provider-logo">🔵</div>
+                <div class="provider-name">Google Gemini</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="pricing" id="pricing">
+        <div class="pricing-inner">
+            <h2>Simple Pricing</h2>
+            <p>The tool is free. You just pay for the AI you use.</p>
+            <div class="price-card">
+                <div class="price-label">Clarity Engine</div>
+                <div class="price">Free</div>
+                <div class="price-note">You pay only for AI API usage (~$0.01-0.05 per query)</div>
+                <ul class="price-features">
+                    <li>All 7 thinking modules</li>
+                    <li>AI-powered analysis & suggestions</li>
+                    <li>Export to Markdown, PDF, JSON</li>
+                    <li>AI Summary Reports</li>
+                    <li>Local storage (your data stays private)</li>
+                    <li>Works offline (except AI features)</li>
+                    <li>Open source on GitHub</li>
+                </ul>
+                <a href="clarity-engine-v2.html" class="btn btn-primary" style="width:100%;justify-content:center">Launch Clarity Engine →</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta">
+        <h2>Ready to think clearly?</h2>
+        <p>Stop planning in circles. Start building on solid foundations.</p>
+        <a href="clarity-engine-v2.html" class="btn btn-primary">Launch Clarity Engine →</a>
+    </section>
+
+    <footer>
+        <p>Built with care. <a href="https://github.com/luigipascal/Clarity" target="_blank">View on GitHub</a></p>
+    </footer>
+</body>
+</html>
