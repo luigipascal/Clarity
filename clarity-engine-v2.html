@@ -241,6 +241,10 @@
                 <div class="nav-item" data-mode="export" onclick="switchMode('export')"><div class="icon">↓</div><span class="label">Export & Report</span></div>
             </div>
             <div class="nav-section">
+                <div class="nav-title">Config</div>
+                <div class="nav-item" data-mode="settings" onclick="switchMode('settings')"><div class="icon">⚙</div><span class="label">AI Settings</span></div>
+            </div>
+            <div class="nav-section">
                 <div class="nav-title">Help</div>
                 <div class="nav-item" data-mode="demo" onclick="switchMode('demo')"><div class="icon">▶</div><span class="label">Demo</span></div>
                 <div class="nav-item" onclick="startTour()"><div class="icon">?</div><span class="label">Guided Tour</span></div>
@@ -518,6 +522,83 @@
                 <div id="export-preview-content" style="font-size:11px;color:var(--text-secondary);font-family:'JetBrains Mono',monospace;white-space:pre-wrap;max-height:300px;overflow-y:auto;background:var(--bg-elevated);padding:12px;border-radius:6px"></div>
             </div>
         </div>
+
+        <!-- Settings -->
+        <div class="panel" id="p-settings">
+            <div class="header"><h2>AI Settings</h2><p>Configure your AI provider and API keys. Keys are stored locally in your browser.</p></div>
+
+            <div class="card">
+                <div class="card-head"><span class="card-title">AI Provider</span></div>
+                <div class="input-group">
+                    <label class="input-label">Select Provider</label>
+                    <select class="text-input" id="ai-provider" onchange="updateProvider(this.value)">
+                        <option value="anthropic">Anthropic (Claude)</option>
+                        <option value="openai">OpenAI (GPT)</option>
+                        <option value="google">Google (Gemini)</option>
+                    </select>
+                </div>
+                <div id="provider-status" style="margin-top:10px;padding:10px;border-radius:6px;font-size:12px"></div>
+            </div>
+
+            <div class="card" id="anthropic-settings">
+                <div class="card-head"><span class="card-title">Anthropic (Claude)</span></div>
+                <div class="input-group">
+                    <label class="input-label">API Key</label>
+                    <input type="password" class="text-input" id="anthropic-key" placeholder="sk-ant-..." onchange="saveKey('anthropic')">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Model</label>
+                    <select class="text-input" id="anthropic-model" onchange="saveKey('anthropic')">
+                        <option value="claude-sonnet-4-20250514">Claude Sonnet 4 (Recommended)</option>
+                        <option value="claude-opus-4-20250514">Claude Opus 4 (Most Capable)</option>
+                        <option value="claude-3-5-haiku-20241022">Claude 3.5 Haiku (Fast & Cheap)</option>
+                    </select>
+                </div>
+                <p style="font-size:11px;color:var(--text-muted)">Get your key at <a href="https://console.anthropic.com/" target="_blank" style="color:var(--accent-clarity)">console.anthropic.com</a></p>
+            </div>
+
+            <div class="card" id="openai-settings">
+                <div class="card-head"><span class="card-title">OpenAI (GPT)</span></div>
+                <div class="input-group">
+                    <label class="input-label">API Key</label>
+                    <input type="password" class="text-input" id="openai-key" placeholder="sk-..." onchange="saveKey('openai')">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Model</label>
+                    <select class="text-input" id="openai-model" onchange="saveKey('openai')">
+                        <option value="gpt-4o">GPT-4o (Recommended)</option>
+                        <option value="gpt-4o-mini">GPT-4o Mini (Fast & Cheap)</option>
+                        <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                    </select>
+                </div>
+                <p style="font-size:11px;color:var(--text-muted)">Get your key at <a href="https://platform.openai.com/api-keys" target="_blank" style="color:var(--accent-clarity)">platform.openai.com</a></p>
+            </div>
+
+            <div class="card" id="google-settings">
+                <div class="card-head"><span class="card-title">Google (Gemini)</span></div>
+                <div class="input-group">
+                    <label class="input-label">API Key</label>
+                    <input type="password" class="text-input" id="google-key" placeholder="AIza..." onchange="saveKey('google')">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Model</label>
+                    <select class="text-input" id="google-model" onchange="saveKey('google')">
+                        <option value="gemini-1.5-pro">Gemini 1.5 Pro (Recommended)</option>
+                        <option value="gemini-1.5-flash">Gemini 1.5 Flash (Fast)</option>
+                        <option value="gemini-2.0-flash-exp">Gemini 2.0 Flash (Experimental)</option>
+                    </select>
+                </div>
+                <p style="font-size:11px;color:var(--text-muted)">Get your key at <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--accent-clarity)">aistudio.google.com</a></p>
+            </div>
+
+            <div class="card">
+                <div class="card-head"><span class="card-title">Test Connection</span></div>
+                <button class="btn btn-primary" onclick="testAIConnection()" id="test-ai-btn" style="width:100%;justify-content:center">
+                    🔌 Test AI Connection
+                </button>
+                <div id="test-result" style="margin-top:10px;display:none"></div>
+            </div>
+        </div>
     </main>
     
     <aside class="right">
@@ -552,40 +633,103 @@
 </div>
 
 <script>
-// Claude API Configuration - Replace with your API key
-const CLAUDE_API_KEY = '***REMOVED***';
-const CLAUDE_MODEL = 'claude-sonnet-4-20250514';
+// ========== AI PROVIDER CONFIGURATION ==========
+const AI_CONFIG = {
+    provider: localStorage.getItem('ai_provider') || 'anthropic',
+    anthropic: {
+        key: localStorage.getItem('anthropic_key') || '',
+        model: localStorage.getItem('anthropic_model') || 'claude-sonnet-4-20250514'
+    },
+    openai: {
+        key: localStorage.getItem('openai_key') || '',
+        model: localStorage.getItem('openai_model') || 'gpt-4o'
+    },
+    google: {
+        key: localStorage.getItem('google_key') || '',
+        model: localStorage.getItem('google_model') || 'gemini-1.5-pro'
+    }
+};
+
+function saveAIConfig() {
+    localStorage.setItem('ai_provider', AI_CONFIG.provider);
+    localStorage.setItem('anthropic_key', AI_CONFIG.anthropic.key);
+    localStorage.setItem('anthropic_model', AI_CONFIG.anthropic.model);
+    localStorage.setItem('openai_key', AI_CONFIG.openai.key);
+    localStorage.setItem('openai_model', AI_CONFIG.openai.model);
+    localStorage.setItem('google_key', AI_CONFIG.google.key);
+    localStorage.setItem('google_model', AI_CONFIG.google.model);
+}
 
 async function askClaude(systemPrompt, userPrompt, maxTokens = 1024) {
-    if (CLAUDE_API_KEY === 'YOUR_API_KEY_HERE') {
-        toast('API Key Required', 'Set your key in the code');
+    const provider = AI_CONFIG.provider;
+    const config = AI_CONFIG[provider];
+
+    if (!config.key) {
+        toast('API Key Required', 'Go to Settings to add your key');
+        switchMode('settings');
         return null;
     }
+
     try {
-        const res = await fetch('https://api.anthropic.com/v1/messages', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-api-key': CLAUDE_API_KEY,
-                'anthropic-version': '2023-06-01',
-                'anthropic-dangerous-direct-browser-access': 'true'
-            },
-            body: JSON.stringify({
-                model: CLAUDE_MODEL,
-                max_tokens: maxTokens,
-                system: systemPrompt,
-                messages: [{ role: 'user', content: userPrompt }]
-            })
-        });
-        if (!res.ok) {
-            const err = await res.json();
-            toast('API Error', err.error?.message || 'Request failed');
-            return null;
+        let res, data;
+
+        if (provider === 'anthropic') {
+            res = await fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': config.key,
+                    'anthropic-version': '2023-06-01',
+                    'anthropic-dangerous-direct-browser-access': 'true'
+                },
+                body: JSON.stringify({
+                    model: config.model,
+                    max_tokens: maxTokens,
+                    system: systemPrompt,
+                    messages: [{ role: 'user', content: userPrompt }]
+                })
+            });
+            if (!res.ok) { const err = await res.json(); throw new Error(err.error?.message || 'Anthropic API error'); }
+            data = await res.json();
+            return data.content[0].text;
         }
-        const data = await res.json();
-        return data.content[0].text;
+
+        else if (provider === 'openai') {
+            res = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${config.key}`
+                },
+                body: JSON.stringify({
+                    model: config.model,
+                    max_tokens: maxTokens,
+                    messages: [
+                        { role: 'system', content: systemPrompt },
+                        { role: 'user', content: userPrompt }
+                    ]
+                })
+            });
+            if (!res.ok) { const err = await res.json(); throw new Error(err.error?.message || 'OpenAI API error'); }
+            data = await res.json();
+            return data.choices[0].message.content;
+        }
+
+        else if (provider === 'google') {
+            res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${config.model}:generateContent?key=${config.key}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: systemPrompt + '\n\n' + userPrompt }] }],
+                    generationConfig: { maxOutputTokens: maxTokens }
+                })
+            });
+            if (!res.ok) { const err = await res.json(); throw new Error(err.error?.message || 'Google API error'); }
+            data = await res.json();
+            return data.candidates[0].content.parts[0].text;
+        }
     } catch (e) {
-        toast('Error', e.message);
+        toast('AI Error', e.message);
         return null;
     }
 }
@@ -1292,6 +1436,76 @@ function generateVisualReport() {
     win.document.close();
     toast('Report Generated', 'Print to save as PDF');
 }
+
+// ========== SETTINGS FUNCTIONS ==========
+function initSettings() {
+    // Load saved values into form
+    document.getElementById('ai-provider').value = AI_CONFIG.provider;
+    document.getElementById('anthropic-key').value = AI_CONFIG.anthropic.key;
+    document.getElementById('anthropic-model').value = AI_CONFIG.anthropic.model;
+    document.getElementById('openai-key').value = AI_CONFIG.openai.key;
+    document.getElementById('openai-model').value = AI_CONFIG.openai.model;
+    document.getElementById('google-key').value = AI_CONFIG.google.key;
+    document.getElementById('google-model').value = AI_CONFIG.google.model;
+    updateProviderStatus();
+}
+
+function updateProvider(provider) {
+    AI_CONFIG.provider = provider;
+    saveAIConfig();
+    updateProviderStatus();
+    toast('Provider Updated', provider.charAt(0).toUpperCase() + provider.slice(1));
+}
+
+function saveKey(provider) {
+    AI_CONFIG[provider].key = document.getElementById(provider + '-key').value;
+    AI_CONFIG[provider].model = document.getElementById(provider + '-model').value;
+    saveAIConfig();
+    updateProviderStatus();
+}
+
+function updateProviderStatus() {
+    const provider = AI_CONFIG.provider;
+    const config = AI_CONFIG[provider];
+    const status = document.getElementById('provider-status');
+
+    if (config.key) {
+        status.innerHTML = `<span style="color:var(--accent-collision)">✓ ${provider.charAt(0).toUpperCase() + provider.slice(1)} configured</span> — Using ${config.model}`;
+        status.style.background = 'rgba(74,222,128,0.1)';
+    } else {
+        status.innerHTML = `<span style="color:var(--accent-resurrector)">✗ No API key set</span> — Add your ${provider} key below`;
+        status.style.background = 'rgba(248,113,113,0.1)';
+    }
+}
+
+async function testAIConnection() {
+    const btn = document.getElementById('test-ai-btn');
+    const result = document.getElementById('test-result');
+
+    btn.disabled = true;
+    btn.textContent = 'Testing...';
+    result.style.display = 'none';
+
+    const response = await askClaude(
+        'You are a helpful assistant. Respond with a single short sentence confirming the connection works.',
+        'Say "Connection successful!" and mention which AI model you are.'
+    );
+
+    btn.disabled = false;
+    btn.textContent = '🔌 Test AI Connection';
+    result.style.display = 'block';
+
+    if (response) {
+        result.innerHTML = `<div style="padding:10px;background:rgba(74,222,128,0.1);border-radius:6px;color:var(--accent-collision)">✓ ${response}</div>`;
+    } else {
+        result.innerHTML = `<div style="padding:10px;background:rgba(248,113,113,0.1);border-radius:6px;color:var(--accent-resurrector)">✗ Connection failed. Check your API key.</div>`;
+    }
+}
+
+// Initialize settings on load
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(initSettings, 100);
+});
 </script>
 </body>
 </html>
