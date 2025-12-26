@@ -184,6 +184,29 @@
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+        /* Tour Overlay */
+        .tour-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; display: none; }
+        .tour-overlay.active { display: block; }
+        .tour-highlight { position: absolute; box-shadow: 0 0 0 4px var(--accent-clarity), 0 0 20px rgba(232,197,71,0.5); border-radius: 8px; z-index: 1001; pointer-events: none; transition: all 0.3s ease; }
+        .tour-tooltip { position: absolute; background: var(--bg-surface); border: 1px solid var(--accent-clarity); border-radius: 12px; padding: 20px; max-width: 320px; z-index: 1002; animation: tourPop 0.3s ease; }
+        @keyframes tourPop { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        .tour-step { font-size: 10px; color: var(--accent-clarity); font-weight: 600; text-transform: uppercase; margin-bottom: 8px; }
+        .tour-title { font-family: 'Instrument Serif', serif; font-size: 18px; margin-bottom: 8px; }
+        .tour-text { font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px; }
+        .tour-nav { display: flex; gap: 8px; justify-content: space-between; }
+        .tour-dots { display: flex; gap: 6px; align-items: center; }
+        .tour-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); }
+        .tour-dot.active { background: var(--accent-clarity); }
+        .btn-danger { background: rgba(248,113,113,0.15); color: var(--accent-resurrector); border: 1px solid rgba(248,113,113,0.3); }
+        .btn-danger:hover { background: rgba(248,113,113,0.25); }
+
+        /* Demo Banner */
+        .demo-banner { background: linear-gradient(135deg, rgba(232,197,71,0.15), rgba(232,197,71,0.05)); border: 1px solid rgba(232,197,71,0.3); border-radius: 12px; padding: 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 16px; }
+        .demo-icon { width: 48px; height: 48px; border-radius: 12px; background: rgba(232,197,71,0.2); display: flex; align-items: center; justify-content: center; font-size: 24px; }
+        .demo-content { flex: 1; }
+        .demo-title { font-family: 'Instrument Serif', serif; font-size: 18px; margin-bottom: 4px; }
+        .demo-text { font-size: 12px; color: var(--text-secondary); }
     </style>
 </head>
 <body>
@@ -211,8 +234,13 @@
                 <div class="nav-title">Overview</div>
                 <div class="nav-item" data-mode="graph" onclick="switchMode('graph')"><div class="icon">◈</div><span class="label">Clarity Graph</span></div>
             </div>
+            <div class="nav-section">
+                <div class="nav-title">Help</div>
+                <div class="nav-item" data-mode="demo" onclick="switchMode('demo')"><div class="icon">▶</div><span class="label">Demo</span></div>
+                <div class="nav-item" onclick="startTour()"><div class="icon">?</div><span class="label">Guided Tour</span></div>
+            </div>
         </nav>
-        <div class="sidebar-footer"><div class="ai-toggle" onclick="this.classList.toggle('active')">AI Enhancement</div></div>
+        <div class="sidebar-footer"><div class="ai-toggle" onclick="clearAllData()">🗑 Clear All Data</div></div>
     </aside>
     
     <main class="main">
@@ -355,6 +383,87 @@
             </div>
             <div class="card"><div class="card-head"><span class="card-title">All Connections</span></div><div id="conn-list"></div></div>
         </div>
+
+        <!-- Demo -->
+        <div class="panel" id="p-demo">
+            <div class="header"><h2>Demo & Examples</h2><p>See what the Clarity Engine can do for your thinking.</p></div>
+
+            <div class="demo-banner">
+                <div class="demo-icon">🚀</div>
+                <div class="demo-content">
+                    <div class="demo-title">Try the Interactive Demo</div>
+                    <div class="demo-text">Load sample data to explore all features without starting from scratch.</div>
+                </div>
+                <button class="btn btn-primary" onclick="loadDemo()">Load Demo Data</button>
+            </div>
+
+            <div class="card">
+                <div class="card-head"><span class="card-title">What You Can Do</span></div>
+                <div style="display:grid;gap:12px">
+                    <div class="list-item" style="cursor:pointer" onclick="switchMode('prerequisite')">
+                        <div class="list-icon" style="background:rgba(125,211,252,0.15);color:var(--accent-prerequisite)">⬡</div>
+                        <div class="list-content">
+                            <div class="list-text"><strong>Prerequisites</strong> - Break down goals into dependencies</div>
+                            <div class="list-meta">AI decomposes goals into 3-5 things that must be true first</div>
+                        </div>
+                    </div>
+                    <div class="list-item" style="cursor:pointer" onclick="switchMode('assumption')">
+                        <div class="list-icon" style="background:rgba(244,114,182,0.15);color:var(--accent-assumption)">◇</div>
+                        <div class="list-content">
+                            <div class="list-text"><strong>Assumptions</strong> - Surface hidden beliefs</div>
+                            <div class="list-meta">AI finds assumptions you didn't know you were making</div>
+                        </div>
+                    </div>
+                    <div class="list-item" style="cursor:pointer" onclick="switchMode('handover')">
+                        <div class="list-icon" style="background:rgba(167,139,250,0.15);color:var(--accent-handover)">⇄</div>
+                        <div class="list-content">
+                            <div class="list-text"><strong>Handover</strong> - Extract tacit knowledge</div>
+                            <div class="list-meta">AI generates interview questions to capture what's undocumented</div>
+                        </div>
+                    </div>
+                    <div class="list-item" style="cursor:pointer" onclick="switchMode('constraint')">
+                        <div class="list-icon" style="background:rgba(251,146,60,0.15);color:var(--accent-constraint)">◎</div>
+                        <div class="list-content">
+                            <div class="list-text"><strong>Constraints</strong> - Creative pressure cooker</div>
+                            <div class="list-meta">Timed challenges with AI feedback on your work</div>
+                        </div>
+                    </div>
+                    <div class="list-item" style="cursor:pointer" onclick="switchMode('collision')">
+                        <div class="list-icon" style="background:rgba(74,222,128,0.15);color:var(--accent-collision)">✧</div>
+                        <div class="list-content">
+                            <div class="list-text"><strong>Collisions</strong> - Spark original ideas</div>
+                            <div class="list-meta">AI finds unexpected connections between unrelated domains</div>
+                        </div>
+                    </div>
+                    <div class="list-item" style="cursor:pointer" onclick="switchMode('resurrector')">
+                        <div class="list-icon" style="background:rgba(248,113,113,0.15);color:var(--accent-resurrector)">↻</div>
+                        <div class="list-content">
+                            <div class="list-text"><strong>Fragments</strong> - Revive abandoned work</div>
+                            <div class="list-meta">AI suggests how to continue or repurpose stalled projects</div>
+                        </div>
+                    </div>
+                    <div class="list-item" style="cursor:pointer" onclick="switchMode('inverse')">
+                        <div class="list-icon" style="background:rgba(96,165,250,0.15);color:var(--accent-inverse)">⊘</div>
+                        <div class="list-content">
+                            <div class="list-text"><strong>Inverse Brief</strong> - Define by exclusion</div>
+                            <div class="list-meta">AI maps the possibility space from what you refuse</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-head"><span class="card-title">Quick Start</span></div>
+                <div style="font-size:13px;color:var(--text-secondary);line-height:1.6">
+                    <p style="margin-bottom:12px"><strong>1.</strong> Start with <strong>Prerequisites</strong> - enter your goal and click "AI Decompose"</p>
+                    <p style="margin-bottom:12px"><strong>2.</strong> Go to <strong>Assumptions</strong> - click "AI Surface Hidden" to find blind spots</p>
+                    <p style="margin-bottom:12px"><strong>3.</strong> Use <strong>Inverse Brief</strong> to define what must NOT happen</p>
+                    <p><strong>4.</strong> Check the <strong>Clarity Graph</strong> to see everything connected</p>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="startTour()" style="width:100%">▶ Start Guided Tour</button>
+        </div>
     </main>
     
     <aside class="right">
@@ -369,6 +478,24 @@
     </aside>
 </div>
 <div class="toast-box" id="toasts"></div>
+
+<!-- Tour Overlay -->
+<div class="tour-overlay" id="tour-overlay" onclick="if(event.target===this)endTour()">
+    <div class="tour-highlight" id="tour-highlight"></div>
+    <div class="tour-tooltip" id="tour-tooltip">
+        <div class="tour-step" id="tour-step-num">Step 1 of 8</div>
+        <div class="tour-title" id="tour-title">Welcome</div>
+        <div class="tour-text" id="tour-text">Tour content</div>
+        <div class="tour-nav">
+            <div class="tour-dots" id="tour-dots"></div>
+            <div style="display:flex;gap:6px">
+                <button class="btn btn-ghost" onclick="endTour()">Skip</button>
+                <button class="btn btn-secondary" onclick="prevTourStep()" id="tour-prev">Back</button>
+                <button class="btn btn-primary" onclick="nextTourStep()" id="tour-next">Next</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
 // Claude API Configuration - Replace with your API key
@@ -473,7 +600,17 @@ function addChild(pid) { const p=G.prereqs.find(x=>x.id===pid); const t=prompt('
 function cycleS(id) { const p=G.prereqs.find(x=>x.id===id); const ss=['','in-progress','complete','blocked']; p.status=ss[(ss.indexOf(p.status)+1)%ss.length]; if(p.status==='complete'&&confirm('Add assumption?')) promptAssum(id); G.save(); update(); }
 function promptAssum(pid) { const p=G.prereqs.find(x=>x.id===pid); const t=prompt('Assumption underlying "'+trunc(p.text,30)+'"?'); if(t){ const a={id:G.id(),text:t,trigger:'monthly',status:'active',at:new Date()}; G.assums.push(a); G.link('assum',a.id,'prereq',pid,'underlies'); } }
 function renderTree() { const box=document.getElementById('tree-box'); const roots=G.prereqs.filter(p=>p.level===0); if(!roots.length){ box.innerHTML='<div class="empty"><div class="empty-icon">⬡</div><div class="empty-title">No goals</div></div>'; document.getElementById('tree-section').style.display='none'; return; } document.getElementById('tree-section').style.display='block'; let h=''; roots.forEach(r=>h+=renderNode(r)); box.innerHTML=h; document.getElementById('tree-depth').textContent='Depth: '+Math.max(...G.prereqs.map(p=>p.level)); }
-function renderNode(n) { const ch=G.prereqs.filter(p=>p.pid===n.id); const lks=G.linked('prereq',n.id); const tags=lks.map(l=>l.t==='assum'?`<span class="tree-tag assumption">◇ ${trunc(l.item.text,12)}</span>`:l.t==='anti'?`<span class="tree-tag antigoal">⊘ ${trunc(l.item.text,12)}</span>`:'' ).join(''); let h=`<div class="tree-node l${n.level}"><div class="tree-status ${n.status}" onclick="cycleS('${n.id}')"></div><span class="tree-text">${n.text}</span><div class="tree-actions"><button class="tree-btn" onclick="addChild('${n.id}')" title="Add prereq">+</button><button class="tree-btn" onclick="aiExpandNode('${n.id}')" title="AI expand">✨</button><button class="tree-btn" onclick="promptAssum('${n.id}')" title="Add assumption">◇</button></div></div>`; if(tags) h=h.replace('</div></div>',`</div>${tags?`<div class="tree-tags">${tags}</div>`:''}` + '</div>'); ch.forEach(c=>h+=renderNode(c)); return h; }
+function renderNode(n) { const ch=G.prereqs.filter(p=>p.pid===n.id); const lks=G.linked('prereq',n.id); const tags=lks.map(l=>l.t==='assum'?`<span class="tree-tag assumption">◇ ${trunc(l.item.text,12)}</span>`:l.t==='anti'?`<span class="tree-tag antigoal">⊘ ${trunc(l.item.text,12)}</span>`:'' ).join(''); let h=`<div class="tree-node l${n.level}"><div class="tree-status ${n.status}" onclick="cycleS('${n.id}')"></div><span class="tree-text">${n.text}</span><div class="tree-actions"><button class="tree-btn" onclick="addChild('${n.id}')" title="Add prereq">+</button><button class="tree-btn" onclick="aiExpandNode('${n.id}')" title="AI expand">✨</button><button class="tree-btn" onclick="promptAssum('${n.id}')" title="Add assumption">◇</button><button class="tree-btn" onclick="delPrereq('${n.id}')" title="Delete" style="color:var(--accent-resurrector)">×</button></div></div>`; if(tags) h=h.replace('</div></div>',`</div>${tags?`<div class="tree-tags">${tags}</div>`:''}` + '</div>'); ch.forEach(c=>h+=renderNode(c)); return h; }
+
+function delPrereq(id) {
+    if(!confirm('Delete this prerequisite and all its children?')) return;
+    const delIds = [id];
+    const findChildren = (pid) => { G.prereqs.filter(p=>p.pid===pid).forEach(c=>{ delIds.push(c.id); findChildren(c.id); }); };
+    findChildren(id);
+    G.prereqs = G.prereqs.filter(p => !delIds.includes(p.id));
+    G.conns = G.conns.filter(c => !delIds.includes(c.fi) && !delIds.includes(c.ti));
+    G.save(); update(); toast('Deleted', 'Prerequisite removed');
+}
 
 // Assumptions
 function addAssumption() { const t=document.getElementById('assum-in').value.trim(); if(!t)return; const tr=document.getElementById('assum-trigger').value; const lk=document.getElementById('assum-link').value; const a={id:G.id(),text:t,trigger:tr,status:'active',at:new Date()}; G.assums.push(a); if(lk) G.link('assum',a.id,'prereq',lk,'underlies'); G.save(); document.getElementById('assum-in').value=''; update(); toast('Assumption added',lk?'Linked':''); }
@@ -505,14 +642,18 @@ Return ONLY a JSON array of objects with "text" (the assumption) and "prereq" (w
     } catch(e) { toast('Parse Error', ''); console.log(res); }
 }
 function breakA(id) { const a=G.assums.find(x=>x.id===id); a.status='broken'; G.linked('assum',id).forEach(l=>{if(l.t==='prereq')l.item.status='blocked';}); G.save(); update(); toast('Assumption broken','Prerequisites blocked'); }
-function renderAssums() { const c=document.getElementById('assum-list'); if(!G.assums.length){ c.innerHTML='<div class="empty"><div class="empty-icon">◇</div><div class="empty-title">No assumptions</div></div>'; return; } const trs={monthly:'⏱',event:'🎯',threshold:'📊'}; c.innerHTML=G.assums.map(a=>{ const lks=G.linked('assum',a.id).map(l=>`<span class="link-tag">⬡ ${trunc(l.item.text,10)}</span>`).join(''); return `<div class="list-item assumption"><div class="list-icon">◇</div><div class="list-content"><div class="list-text">${a.text}</div><div class="list-meta"><span>${trs[a.trigger]} ${a.trigger}</span><span>${a.status}</span></div>${lks?`<div class="list-links">${lks}</div>`:''}</div><div class="list-actions"><button class="btn btn-ghost" onclick="breakA('${a.id}')">Break</button></div></div>`; }).join(''); }
+function renderAssums() { const c=document.getElementById('assum-list'); if(!G.assums.length){ c.innerHTML='<div class="empty"><div class="empty-icon">◇</div><div class="empty-title">No assumptions</div></div>'; return; } const trs={monthly:'⏱',event:'🎯',threshold:'📊'}; c.innerHTML=G.assums.map(a=>{ const lks=G.linked('assum',a.id).map(l=>`<span class="link-tag">⬡ ${trunc(l.item.text,10)}</span>`).join(''); return `<div class="list-item assumption"><div class="list-icon">◇</div><div class="list-content"><div class="list-text">${a.text}</div><div class="list-meta"><span>${trs[a.trigger]} ${a.trigger}</span><span>${a.status}</span></div>${lks?`<div class="list-links">${lks}</div>`:''}</div><div class="list-actions"><button class="btn btn-ghost" onclick="breakA('${a.id}')">Break</button><button class="btn btn-ghost" onclick="delAssum('${a.id}')" style="color:var(--accent-resurrector)">×</button></div></div>`; }).join(''); }
+
+function delAssum(id) { G.assums = G.assums.filter(a=>a.id!==id); G.conns = G.conns.filter(c=>!(c.ft==='assum'&&c.fi===id)&&!(c.tt==='assum'&&c.ti===id)); G.save(); update(); toast('Deleted',''); }
 
 // Handover
 let customQs = [];
 function renderQ() { const allQs = [...Qs, ...customQs]; const q=allQs[qIdx % allQs.length]; document.getElementById('q-text').textContent='"'+q.q+'"'; document.getElementById('q-ctx').textContent=q.c; document.getElementById('q-num').textContent='Q'+(qIdx+1)+'/'+allQs.length; }
 function nextQ() { const allQs = [...Qs, ...customQs]; qIdx=(qIdx+1)%allQs.length; renderQ(); }
 function saveKnowledge() { const t=document.getElementById('know-in').value.trim(); if(!t)return; const lk=document.getElementById('know-link').value; const allQs = [...Qs, ...customQs]; const k={id:G.id(),text:t,q:allQs[qIdx % allQs.length].q,at:new Date()}; G.knows.push(k); if(lk) G.link('know',k.id,'prereq',lk,'informs'); G.save(); document.getElementById('know-in').value=''; nextQ(); update(); toast('Knowledge saved',''); }
-function renderKnows() { const c=document.getElementById('know-list'); if(!G.knows.length){ c.innerHTML='<div class="empty"><div class="empty-icon">⇄</div><div class="empty-title">No knowledge</div></div>'; return; } c.innerHTML=G.knows.map(k=>`<div class="list-item knowledge"><div class="list-icon">⇄</div><div class="list-content"><div class="list-text">${k.text}</div><div class="list-meta"><span>Q: ${trunc(k.q,20)}</span></div></div></div>`).join(''); }
+function renderKnows() { const c=document.getElementById('know-list'); if(!G.knows.length){ c.innerHTML='<div class="empty"><div class="empty-icon">⇄</div><div class="empty-title">No knowledge</div></div>'; return; } c.innerHTML=G.knows.map(k=>`<div class="list-item knowledge"><div class="list-icon">⇄</div><div class="list-content"><div class="list-text">${k.text}</div><div class="list-meta"><span>Q: ${trunc(k.q,20)}</span></div></div><div class="list-actions"><button class="btn btn-ghost" onclick="delKnow('${k.id}')" style="color:var(--accent-resurrector)">×</button></div></div>`).join(''); }
+
+function delKnow(id) { G.knows = G.knows.filter(k=>k.id!==id); G.conns = G.conns.filter(c=>!(c.ft==='know'&&c.fi===id)&&!(c.tt==='know'&&c.ti===id)); G.save(); update(); toast('Deleted',''); }
 
 async function aiGenerateQuestions() {
     const btn=document.getElementById('ai-q-btn'); btn.disabled=true; btn.textContent='Generating...';
@@ -583,11 +724,15 @@ Keep each connection to 1-2 sentences. Be creative but practical.`;
     document.getElementById('coll-conn').value = res;
     toast('Connections Found', 'Review and save');
 }
-function renderColls() { const c=document.getElementById('coll-list'); if(!G.colls.length){ c.innerHTML='<div class="empty"><div class="empty-icon">✧</div><div class="empty-title">No collisions</div></div>'; return; } c.innerHTML=G.colls.map(x=>`<div class="list-item collision"><div class="list-icon">✧</div><div class="list-content"><div class="list-text">${x.conn}</div><div class="list-meta"><span>${x.yours} × ${x.random}</span></div></div></div>`).join(''); }
+function renderColls() { const c=document.getElementById('coll-list'); if(!G.colls.length){ c.innerHTML='<div class="empty"><div class="empty-icon">✧</div><div class="empty-title">No collisions</div></div>'; return; } c.innerHTML=G.colls.map(x=>`<div class="list-item collision"><div class="list-icon">✧</div><div class="list-content"><div class="list-text">${x.conn}</div><div class="list-meta"><span>${x.yours} × ${x.random}</span></div></div><div class="list-actions"><button class="btn btn-ghost" onclick="delColl('${x.id}')" style="color:var(--accent-resurrector)">×</button></div></div>`).join(''); }
+
+function delColl(id) { G.colls = G.colls.filter(c=>c.id!==id); G.conns = G.conns.filter(c=>!(c.ft==='coll'&&c.fi===id)&&!(c.tt==='coll'&&c.ti===id)); G.save(); update(); toast('Deleted',''); }
 
 // Fragments
 function saveFrag() { const t=document.getElementById('frag-in').value.trim(); if(!t)return; G.frags.push({id:G.id(),text:t,start:document.getElementById('frag-start').value,stop:document.getElementById('frag-stop').value,tags:document.getElementById('frag-tags').value.split(',').map(x=>x.trim()).filter(x=>x),at:new Date()}); G.save(); document.getElementById('frag-in').value=''; document.getElementById('frag-start').value=''; document.getElementById('frag-stop').value=''; document.getElementById('frag-tags').value=''; update(); toast('Fragment archived',''); }
-function renderFrags() { const c=document.getElementById('frag-list'); if(!G.frags.length){ c.innerHTML='<div class="empty"><div class="empty-icon">↻</div><div class="empty-title">No fragments</div></div>'; return; } c.innerHTML=G.frags.map(f=>{ const tags=f.tags.map(t=>`<span class="link-tag">${t}</span>`).join(''); return `<div class="list-item fragment"><div class="list-icon">↻</div><div class="list-content"><div class="list-text">${trunc(f.text,80)}</div><div class="list-meta"><span>Start: ${f.start||'?'}</span><span>Stop: ${f.stop||'?'}</span></div>${tags?`<div class="list-links">${tags}</div>`:''}</div><div class="list-actions"><button class="btn btn-ghost" onclick="aiReviveFrag('${f.id}')">✨ Revive</button><button class="btn btn-ghost" onclick="useFrag('${f.id}')">Use</button></div></div>`; }).join(''); }
+function renderFrags() { const c=document.getElementById('frag-list'); if(!G.frags.length){ c.innerHTML='<div class="empty"><div class="empty-icon">↻</div><div class="empty-title">No fragments</div></div>'; return; } c.innerHTML=G.frags.map(f=>{ const tags=f.tags.map(t=>`<span class="link-tag">${t}</span>`).join(''); return `<div class="list-item fragment"><div class="list-icon">↻</div><div class="list-content"><div class="list-text">${trunc(f.text,80)}</div><div class="list-meta"><span>Start: ${f.start||'?'}</span><span>Stop: ${f.stop||'?'}</span></div>${tags?`<div class="list-links">${tags}</div>`:''}</div><div class="list-actions"><button class="btn btn-ghost" onclick="aiReviveFrag('${f.id}')">✨</button><button class="btn btn-ghost" onclick="useFrag('${f.id}')">Use</button><button class="btn btn-ghost" onclick="delFrag('${f.id}')" style="color:var(--accent-resurrector)">×</button></div></div>`; }).join(''); }
+
+function delFrag(id) { G.frags = G.frags.filter(f=>f.id!==id); G.save(); update(); toast('Deleted',''); }
 function useFrag(id) { switchMode('collision'); setTimeout(()=>document.getElementById('coll-frag').value=id,100); }
 
 async function aiAnalyzeFragment() {
@@ -677,6 +822,149 @@ function renderSugg() { const c=document.getElementById('suggestions'); const s=
 
 // Activity
 function renderAct() { const c=document.getElementById('activity'); const all=[ ...G.prereqs.map(p=>({t:'prerequisite',i:p,d:new Date(p.at)})), ...G.assums.map(a=>({t:'assumption',i:a,d:new Date(a.at)})), ...G.knows.map(k=>({t:'knowledge',i:k,d:new Date(k.at)})), ...G.frags.map(f=>({t:'fragment',i:f,d:new Date(f.at)})), ...G.colls.map(x=>({t:'collision',i:x,d:new Date(x.at)})), ...G.antis.map(a=>({t:'antigoal',i:a,d:new Date(a.at)})) ].sort((a,b)=>b.d-a.d).slice(0,5); if(!all.length){ c.innerHTML='<div class="empty" style="padding:16px"><div class="empty-text">No activity</div></div>'; return; } const icons={prerequisite:'⬡',assumption:'◇',knowledge:'⇄',fragment:'↻',collision:'✧',antigoal:'⊘'}; c.innerHTML=all.map(a=>`<div class="activity-card ${a.t}"><div class="activity-type">${icons[a.t]} ${a.t}</div><div class="activity-text">${trunc(a.i.text||a.i.conn||'',40)}</div><div class="activity-meta">${timeAgo(a.d)}</div></div>`).join(''); }
+
+// ========== TOUR ==========
+const tourSteps = [
+    { target: '.logo', title: 'Welcome to Clarity Engine', text: 'A thinking tool powered by Claude AI. It helps you break down goals, surface hidden assumptions, and think more clearly.', pos: 'right' },
+    { target: '[data-mode="prerequisite"]', title: 'Prerequisites', text: 'Start here. Enter your goal and click "AI Decompose" to break it into 3-5 things that must be true first. Keep expanding until you hit actionable items.', pos: 'right' },
+    { target: '[data-mode="assumption"]', title: 'Assumptions', text: 'Hidden beliefs can derail projects. Click "AI Surface Hidden" to find assumptions you didn\'t know you were making.', pos: 'right' },
+    { target: '[data-mode="handover"]', title: 'Handover', text: 'Extract tacit knowledge before it disappears. AI generates interview questions to capture what\'s undocumented.', pos: 'right' },
+    { target: '[data-mode="constraint"]', title: 'Constraints', text: 'Creativity under pressure. Pick a domain, get a constraint, write against the clock. AI evaluates your work.', pos: 'right' },
+    { target: '[data-mode="collision"]', title: 'Collisions', text: 'Spark original ideas. Your challenge meets a random domain. AI finds unexpected connections between them.', pos: 'right' },
+    { target: '[data-mode="resurrector"]', title: 'Fragments', text: 'Abandoned drafts waiting for their moment. Archive them here, and AI will suggest how to revive them later.', pos: 'right' },
+    { target: '[data-mode="inverse"]', title: 'Inverse Brief', text: 'Define what must NOT happen. AI maps the remaining possibility space - often more original than starting positive.', pos: 'right' },
+    { target: '[data-mode="graph"]', title: 'Clarity Graph', text: 'See everything connected. Prerequisites, assumptions, anti-goals - all linked together.', pos: 'right' },
+    { target: '.right', title: 'Live Sidebar', text: 'Track your progress in real-time. See recent activity, connections, and AI suggestions as you work.', pos: 'left' }
+];
+
+let tourIdx = 0;
+
+function startTour() {
+    tourIdx = 0;
+    document.getElementById('tour-overlay').classList.add('active');
+    renderTourStep();
+}
+
+function endTour() {
+    document.getElementById('tour-overlay').classList.remove('active');
+    toast('Tour ended', 'Explore on your own!');
+}
+
+function nextTourStep() {
+    if (tourIdx < tourSteps.length - 1) { tourIdx++; renderTourStep(); }
+    else { endTour(); }
+}
+
+function prevTourStep() {
+    if (tourIdx > 0) { tourIdx--; renderTourStep(); }
+}
+
+function renderTourStep() {
+    const step = tourSteps[tourIdx];
+    const target = document.querySelector(step.target);
+    const highlight = document.getElementById('tour-highlight');
+    const tooltip = document.getElementById('tour-tooltip');
+
+    // Position highlight
+    if (target) {
+        const rect = target.getBoundingClientRect();
+        highlight.style.top = (rect.top - 4) + 'px';
+        highlight.style.left = (rect.left - 4) + 'px';
+        highlight.style.width = (rect.width + 8) + 'px';
+        highlight.style.height = (rect.height + 8) + 'px';
+
+        // Position tooltip
+        if (step.pos === 'right') {
+            tooltip.style.top = rect.top + 'px';
+            tooltip.style.left = (rect.right + 20) + 'px';
+            tooltip.style.right = 'auto';
+        } else {
+            tooltip.style.top = rect.top + 'px';
+            tooltip.style.right = (window.innerWidth - rect.left + 20) + 'px';
+            tooltip.style.left = 'auto';
+        }
+    }
+
+    // Update content
+    document.getElementById('tour-step-num').textContent = `Step ${tourIdx + 1} of ${tourSteps.length}`;
+    document.getElementById('tour-title').textContent = step.title;
+    document.getElementById('tour-text').textContent = step.text;
+
+    // Update dots
+    document.getElementById('tour-dots').innerHTML = tourSteps.map((_, i) =>
+        `<div class="tour-dot ${i === tourIdx ? 'active' : ''}"></div>`
+    ).join('');
+
+    // Update buttons
+    document.getElementById('tour-prev').style.display = tourIdx === 0 ? 'none' : 'inline-flex';
+    document.getElementById('tour-next').textContent = tourIdx === tourSteps.length - 1 ? 'Finish' : 'Next';
+}
+
+// ========== DEMO DATA ==========
+function loadDemo() {
+    if (G.prereqs.length > 0 && !confirm('This will replace your current data. Continue?')) return;
+
+    // Clear existing
+    G.prereqs = []; G.assums = []; G.knows = []; G.frags = []; G.colls = []; G.antis = []; G.conns = [];
+
+    const now = new Date();
+    const id = () => G.id();
+
+    // Demo prerequisites
+    const goalId = id();
+    G.prereqs.push({id: goalId, text: 'Launch AI-powered customer support chatbot by Q2', level: 0, status: 'in-progress', pid: null, at: now});
+
+    const p1 = id(), p2 = id(), p3 = id(), p4 = id();
+    G.prereqs.push({id: p1, text: 'NLP model trained on company knowledge base', level: 1, status: 'complete', pid: goalId, at: now});
+    G.prereqs.push({id: p2, text: 'Integration with existing ticketing system', level: 1, status: 'in-progress', pid: goalId, at: now});
+    G.prereqs.push({id: p3, text: 'Escalation workflow to human agents defined', level: 1, status: '', pid: goalId, at: now});
+    G.prereqs.push({id: p4, text: 'Security review and compliance approval', level: 1, status: 'blocked', pid: goalId, at: now});
+
+    const p1a = id(), p1b = id();
+    G.prereqs.push({id: p1a, text: 'Clean and structure 2 years of support tickets', level: 2, status: 'complete', pid: p1, at: now});
+    G.prereqs.push({id: p1b, text: 'Fine-tune base model on domain vocabulary', level: 2, status: 'complete', pid: p1, at: now});
+
+    // Demo assumptions
+    const a1 = id(), a2 = id(), a3 = id();
+    G.assums.push({id: a1, text: 'Response time under 3 seconds is acceptable to users', trigger: 'threshold', status: 'active', at: now});
+    G.assums.push({id: a2, text: 'Legal team will approve data processing within 2 weeks', trigger: 'event', status: 'active', at: now});
+    G.assums.push({id: a3, text: 'Existing API can handle 10x current load', trigger: 'monthly', status: 'active', at: now});
+
+    G.link('assum', a1, 'prereq', p2, 'underlies');
+    G.link('assum', a2, 'prereq', p4, 'underlies');
+
+    // Demo knowledge
+    G.knows.push({id: id(), text: 'The legacy ticketing system has an undocumented rate limit of 100 requests/minute', q: 'What would surprise your replacement?', at: now});
+    G.knows.push({id: id(), text: 'Customer complaints spike on Monday mornings - schedule maintenance for weekends', q: 'What do you check first when something goes wrong?', at: now});
+
+    // Demo fragments
+    G.frags.push({id: id(), text: 'Draft proposal for proactive support - reaching out before customers complain based on usage patterns...', start: 'Excited about innovation', stop: 'Resource constraints', tags: ['proposal', 'proactive', 'ml'], at: now});
+
+    // Demo collisions
+    G.colls.push({id: id(), yours: 'customer support', random: 'Beekeeping', conn: 'Like bees communicating through dance, support tickets contain patterns. The "waggle dance" of frequent keywords could predict issues before they escalate.', at: now});
+
+    // Demo anti-goals
+    const anti1 = id(), anti2 = id(), anti3 = id();
+    G.antis.push({id: anti1, text: 'Must not require customers to repeat information they already provided', at: now});
+    G.antis.push({id: anti2, text: 'Must not feel robotic or scripted', at: now});
+    G.antis.push({id: anti3, text: 'Must not create more work for human agents', at: now});
+
+    G.link('anti', anti1, 'prereq', p2, 'constrains');
+
+    G.save();
+    update();
+    switchMode('prerequisite');
+    toast('Demo Loaded', 'Explore the example data');
+}
+
+// ========== CLEAR ALL DATA ==========
+function clearAllData() {
+    if (!confirm('Delete ALL data? This cannot be undone.')) return;
+    G.prereqs = []; G.assums = []; G.knows = []; G.frags = []; G.colls = []; G.antis = []; G.conns = [];
+    G.save();
+    update();
+    toast('Cleared', 'All data deleted');
+}
 </script>
 </body>
 </html>
