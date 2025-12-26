@@ -235,6 +235,10 @@
                 <div class="nav-item" data-mode="graph" onclick="switchMode('graph')"><div class="icon">◈</div><span class="label">Clarity Graph</span></div>
             </div>
             <div class="nav-section">
+                <div class="nav-title">Output</div>
+                <div class="nav-item" data-mode="export" onclick="switchMode('export')"><div class="icon">↓</div><span class="label">Export & Report</span></div>
+            </div>
+            <div class="nav-section">
                 <div class="nav-title">Help</div>
                 <div class="nav-item" data-mode="demo" onclick="switchMode('demo')"><div class="icon">▶</div><span class="label">Demo</span></div>
                 <div class="nav-item" onclick="startTour()"><div class="icon">?</div><span class="label">Guided Tour</span></div>
@@ -463,6 +467,54 @@
             </div>
 
             <button class="btn btn-primary" onclick="startTour()" style="width:100%">▶ Start Guided Tour</button>
+        </div>
+
+        <!-- Export -->
+        <div class="panel" id="p-export">
+            <div class="header"><h2>Export & Report</h2><p>Generate deliverables from your thinking work.</p></div>
+
+            <div class="card">
+                <div class="card-head"><span class="card-title">Quick Export</span></div>
+                <div style="display:grid;gap:10px">
+                    <button class="btn btn-secondary" onclick="exportMarkdown()" style="width:100%;justify-content:center">
+                        📄 Export to Markdown
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportJSON()" style="width:100%;justify-content:center">
+                        { } Export Raw JSON
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-head"><span class="card-title">✨ AI Summary Report</span></div>
+                <p style="font-size:12px;color:var(--text-secondary);margin-bottom:14px">
+                    Claude analyzes all your work and generates a comprehensive strategic brief with insights, risks, and recommendations.
+                </p>
+                <button class="btn btn-primary" onclick="generateAISummary()" id="ai-summary-btn" style="width:100%;justify-content:center">
+                    ✨ Generate AI Summary
+                </button>
+                <div id="ai-summary-result" style="display:none;margin-top:16px">
+                    <div class="card-head"><span class="card-title">Generated Report</span>
+                        <button class="btn btn-ghost" onclick="copyAISummary()">Copy</button>
+                    </div>
+                    <div id="ai-summary-content" style="font-size:12px;line-height:1.6;color:var(--text-secondary);white-space:pre-wrap;max-height:400px;overflow-y:auto"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-head"><span class="card-title">📊 Visual Report</span></div>
+                <p style="font-size:12px;color:var(--text-secondary);margin-bottom:14px">
+                    Generate a styled, printable report. Opens in a new tab - use your browser's Print → Save as PDF.
+                </p>
+                <button class="btn btn-primary" onclick="generateVisualReport()" style="width:100%;justify-content:center">
+                    📊 Generate Visual Report
+                </button>
+            </div>
+
+            <div class="card" id="export-preview" style="display:none">
+                <div class="card-head"><span class="card-title">Preview</span></div>
+                <div id="export-preview-content" style="font-size:11px;color:var(--text-secondary);font-family:'JetBrains Mono',monospace;white-space:pre-wrap;max-height:300px;overflow-y:auto;background:var(--bg-elevated);padding:12px;border-radius:6px"></div>
+            </div>
         </div>
     </main>
     
@@ -964,6 +1016,270 @@ function clearAllData() {
     G.save();
     update();
     toast('Cleared', 'All data deleted');
+}
+
+// ========== EXPORT FUNCTIONS ==========
+
+function buildPrereqTree(pid = null, indent = '') {
+    const children = G.prereqs.filter(p => p.pid === pid);
+    let md = '';
+    children.forEach(p => {
+        const status = p.status === 'complete' ? '✓' : p.status === 'blocked' ? '✗' : p.status === 'in-progress' ? '◐' : '○';
+        md += `${indent}- ${status} ${p.text}\n`;
+        md += buildPrereqTree(p.id, indent + '  ');
+    });
+    return md;
+}
+
+function exportMarkdown() {
+    if (!G.prereqs.length && !G.assums.length && !G.antis.length) {
+        toast('No data', 'Add some content first');
+        return;
+    }
+
+    const goals = G.prereqs.filter(p => p.level === 0).map(p => p.text).join(', ') || 'Untitled';
+    let md = `# Clarity Engine Report\n\n`;
+    md += `**Generated:** ${new Date().toLocaleString()}\n\n`;
+    md += `**Goals:** ${goals}\n\n`;
+    md += `---\n\n`;
+
+    // Prerequisites
+    if (G.prereqs.length) {
+        md += `## Prerequisites\n\n`;
+        md += buildPrereqTree(null);
+        md += `\n`;
+    }
+
+    // Assumptions
+    if (G.assums.length) {
+        md += `## Assumptions\n\n`;
+        G.assums.forEach(a => {
+            md += `- **${a.status}** (${a.trigger}): ${a.text}\n`;
+        });
+        md += `\n`;
+    }
+
+    // Knowledge
+    if (G.knows.length) {
+        md += `## Captured Knowledge\n\n`;
+        G.knows.forEach(k => {
+            md += `- ${k.text}\n  - *Q: ${k.q}*\n`;
+        });
+        md += `\n`;
+    }
+
+    // Anti-goals
+    if (G.antis.length) {
+        md += `## Anti-Goals (Must NOT)\n\n`;
+        G.antis.forEach(a => {
+            md += `- ✗ ${a.text}\n`;
+        });
+        md += `\n`;
+    }
+
+    // Collisions
+    if (G.colls.length) {
+        md += `## Collisions & Insights\n\n`;
+        G.colls.forEach(c => {
+            md += `### ${c.yours} × ${c.random}\n`;
+            md += `${c.conn}\n\n`;
+        });
+    }
+
+    // Fragments
+    if (G.frags.length) {
+        md += `## Fragments (Archived)\n\n`;
+        G.frags.forEach(f => {
+            md += `### ${f.tags.join(', ') || 'Untagged'}\n`;
+            md += `${f.text}\n`;
+            md += `*Started: ${f.start || '?'} | Stopped: ${f.stop || '?'}*\n\n`;
+        });
+    }
+
+    // Download
+    const blob = new Blob([md], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `clarity-report-${new Date().toISOString().split('T')[0]}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast('Downloaded', 'Markdown file saved');
+}
+
+function exportJSON() {
+    const data = { prereqs: G.prereqs, assums: G.assums, knows: G.knows, frags: G.frags, colls: G.colls, antis: G.antis, conns: G.conns, exported: new Date().toISOString() };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `clarity-data-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast('Downloaded', 'JSON file saved');
+}
+
+async function generateAISummary() {
+    if (!G.prereqs.length) { toast('No data', 'Add prerequisites first'); return; }
+
+    const btn = document.getElementById('ai-summary-btn');
+    btn.disabled = true; btn.textContent = 'Generating report...';
+
+    // Build context
+    const goals = G.prereqs.filter(p => p.level === 0).map(p => p.text).join('; ');
+    const prereqs = G.prereqs.map(p => `${'  '.repeat(p.level)}[${p.status || 'pending'}] ${p.text}`).join('\n');
+    const assumptions = G.assums.map(a => `- [${a.status}] ${a.text}`).join('\n') || 'None logged';
+    const antigoals = G.antis.map(a => `- ${a.text}`).join('\n') || 'None defined';
+    const knowledge = G.knows.map(k => `- ${k.text}`).join('\n') || 'None captured';
+    const collisions = G.colls.map(c => `${c.yours} × ${c.random}: ${c.conn}`).join('\n') || 'None';
+
+    const sys = `You are a strategic advisor analyzing a project planning session. Generate a comprehensive executive brief that includes:
+
+1. **Executive Summary** (2-3 sentences)
+2. **Goal Analysis** - What they're trying to achieve and why it matters
+3. **Critical Path** - The most important prerequisites to focus on
+4. **Risk Assessment** - Based on assumptions and blocked items
+5. **Blind Spots** - What might they be missing?
+6. **Strategic Recommendations** - 3-5 actionable next steps
+7. **Anti-Pattern Analysis** - How the anti-goals shape the solution space
+
+Be specific, actionable, and reference their actual content. Write in a professional but accessible tone.`;
+
+    const prompt = `PROJECT ANALYSIS REQUEST
+
+GOALS:
+${goals}
+
+PREREQUISITE TREE:
+${prereqs}
+
+ASSUMPTIONS:
+${assumptions}
+
+ANTI-GOALS (Must NOT):
+${antigoals}
+
+CAPTURED KNOWLEDGE:
+${knowledge}
+
+CREATIVE COLLISIONS:
+${collisions}
+
+Generate a strategic brief analyzing this project.`;
+
+    const res = await askClaude(sys, prompt, 2000);
+    btn.disabled = false; btn.textContent = '✨ Generate AI Summary';
+
+    if (res) {
+        document.getElementById('ai-summary-content').textContent = res;
+        document.getElementById('ai-summary-result').style.display = 'block';
+        toast('Report Generated', 'Review below');
+    }
+}
+
+function copyAISummary() {
+    const text = document.getElementById('ai-summary-content').textContent;
+    navigator.clipboard.writeText(text);
+    toast('Copied', 'Report copied to clipboard');
+}
+
+function generateVisualReport() {
+    if (!G.prereqs.length) { toast('No data', 'Add prerequisites first'); return; }
+
+    const goals = G.prereqs.filter(p => p.level === 0).map(p => p.text).join(', ');
+
+    let html = `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Clarity Report - ${goals}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; color: #1a1a1a; line-height: 1.6; }
+        h1 { font-size: 28px; margin-bottom: 8px; }
+        .subtitle { color: #666; font-size: 14px; margin-bottom: 32px; }
+        h2 { font-size: 18px; color: #333; margin: 32px 0 16px; padding-bottom: 8px; border-bottom: 2px solid #e8c547; }
+        h3 { font-size: 14px; color: #666; margin: 16px 0 8px; }
+        .prereq { padding: 8px 12px; margin: 4px 0; background: #f5f5f5; border-radius: 6px; border-left: 3px solid #7dd3fc; }
+        .prereq.complete { border-left-color: #4ade80; }
+        .prereq.blocked { border-left-color: #f87171; }
+        .prereq.in-progress { border-left-color: #fb923c; }
+        .l1 { margin-left: 20px; } .l2 { margin-left: 40px; } .l3 { margin-left: 60px; }
+        .assumption { padding: 8px 12px; margin: 4px 0; background: #fdf2f8; border-radius: 6px; border-left: 3px solid #f472b6; }
+        .antigoal { padding: 8px 12px; margin: 4px 0; background: #eff6ff; border-radius: 6px; border-left: 3px solid #60a5fa; }
+        .knowledge { padding: 8px 12px; margin: 4px 0; background: #f5f3ff; border-radius: 6px; border-left: 3px solid #a78bfa; }
+        .collision { padding: 12px; margin: 8px 0; background: #f0fdf4; border-radius: 6px; border-left: 3px solid #4ade80; }
+        .collision-header { font-weight: 600; color: #166534; margin-bottom: 4px; }
+        .status { font-size: 11px; padding: 2px 6px; border-radius: 4px; margin-left: 8px; }
+        .status.complete { background: #dcfce7; color: #166534; }
+        .status.blocked { background: #fee2e2; color: #991b1b; }
+        .status.in-progress { background: #ffedd5; color: #9a3412; }
+        .status.active { background: #fdf2f8; color: #9d174d; }
+        .meta { font-size: 12px; color: #666; margin-top: 4px; }
+        .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #eee; font-size: 12px; color: #999; text-align: center; }
+        @media print { body { padding: 20px; } }
+    </style>
+</head>
+<body>
+    <h1>Clarity Report</h1>
+    <div class="subtitle">Generated ${new Date().toLocaleString()} | Goals: ${goals}</div>
+`;
+
+    // Prerequisites
+    if (G.prereqs.length) {
+        html += `<h2>Prerequisites</h2>`;
+        G.prereqs.forEach(p => {
+            const statusClass = p.status || '';
+            const statusLabel = p.status ? `<span class="status ${p.status}">${p.status}</span>` : '';
+            html += `<div class="prereq ${statusClass} l${p.level}">${p.text}${statusLabel}</div>`;
+        });
+    }
+
+    // Assumptions
+    if (G.assums.length) {
+        html += `<h2>Assumptions</h2>`;
+        G.assums.forEach(a => {
+            html += `<div class="assumption">${a.text}<span class="status ${a.status}">${a.status}</span><div class="meta">Trigger: ${a.trigger}</div></div>`;
+        });
+    }
+
+    // Anti-goals
+    if (G.antis.length) {
+        html += `<h2>Anti-Goals</h2>`;
+        G.antis.forEach(a => {
+            html += `<div class="antigoal">✗ ${a.text}</div>`;
+        });
+    }
+
+    // Knowledge
+    if (G.knows.length) {
+        html += `<h2>Captured Knowledge</h2>`;
+        G.knows.forEach(k => {
+            html += `<div class="knowledge">${k.text}<div class="meta">Q: ${k.q}</div></div>`;
+        });
+    }
+
+    // Collisions
+    if (G.colls.length) {
+        html += `<h2>Creative Collisions</h2>`;
+        G.colls.forEach(c => {
+            html += `<div class="collision"><div class="collision-header">${c.yours} × ${c.random}</div>${c.conn}</div>`;
+        });
+    }
+
+    html += `
+    <div class="footer">
+        Generated by Clarity Engine | Think once. Build right.
+    </div>
+</body>
+</html>`;
+
+    // Open in new tab
+    const win = window.open('', '_blank');
+    win.document.write(html);
+    win.document.close();
+    toast('Report Generated', 'Print to save as PDF');
 }
 </script>
 </body>
