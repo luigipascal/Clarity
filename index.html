@@ -96,10 +96,23 @@
         .cta h2 { font-family: 'Instrument Serif', serif; font-size: 48px; margin-bottom: 16px; }
         .cta p { color: var(--text-secondary); font-size: 18px; margin-bottom: 32px; }
 
+        /* Support Section */
+        .support { padding: 60px 40px; text-align: center; }
+        .support h2 { font-family: 'Instrument Serif', serif; font-size: 32px; margin-bottom: 16px; }
+        .support > p { color: var(--text-secondary); margin-bottom: 32px; }
+        .support-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+        .btn-kofi { background: #FF5E5B; color: white; }
+        .btn-kofi:hover { background: #ff4744; transform: translateY(-1px); }
+        .btn-sponsor { background: #db61a2; color: white; }
+        .btn-sponsor:hover { background: #c94d8f; transform: translateY(-1px); }
+
         /* Footer */
         footer { padding: 40px; text-align: center; border-top: 1px solid #1f1f24; }
-        footer p { color: var(--text-secondary); font-size: 13px; }
+        footer p { color: var(--text-secondary); font-size: 13px; margin-bottom: 8px; }
         footer a { color: var(--accent); text-decoration: none; }
+        .footer-brand { font-size: 12px; color: var(--text-secondary); opacity: 0.7; }
+        .footer-links { display: flex; gap: 24px; justify-content: center; margin-top: 16px; }
+        .footer-links a { font-size: 12px; }
 
         @media (max-width: 768px) {
             .hero h1 { font-size: 40px; }
@@ -255,8 +268,23 @@
         <a href="clarity-engine-v2.html" class="btn btn-primary">Launch Clarity Engine →</a>
     </section>
 
+    <section class="support">
+        <h2>Support This Project</h2>
+        <p>Clarity Engine is free and open source. If it helps you think better, consider supporting its development.</p>
+        <div class="support-buttons">
+            <a href="https://ko-fi.com/bertaone" target="_blank" class="btn btn-kofi">☕ Buy Me a Coffee</a>
+            <a href="https://github.com/sponsors/luigipascal" target="_blank" class="btn btn-sponsor">💖 GitHub Sponsors</a>
+        </div>
+    </section>
+
     <footer>
         <p>Built with care. <a href="https://github.com/luigipascal/Clarity" target="_blank">View on GitHub</a></p>
+        <p class="footer-brand">A <a href="https://berta.one" target="_blank">Berta.one</a> project by <a href="https://rondanini.com" target="_blank">Rondanini Publishing</a></p>
+        <div class="footer-links">
+            <a href="https://ko-fi.com/bertaone" target="_blank">Ko-fi</a>
+            <a href="https://github.com/sponsors/luigipascal" target="_blank">Sponsor</a>
+            <a href="https://github.com/luigipascal/Clarity" target="_blank">GitHub</a>
+        </div>
     </footer>
 </body>
 </html>
