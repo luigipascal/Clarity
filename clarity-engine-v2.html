@@ -186,9 +186,11 @@
         ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
         /* Tour Overlay */
-        .tour-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; display: none; }
+        .tour-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000; display: none; }
         .tour-overlay.active { display: block; }
-        .tour-highlight { position: absolute; box-shadow: 0 0 0 4px var(--accent-clarity), 0 0 20px rgba(232,197,71,0.5); border-radius: 8px; z-index: 1001; pointer-events: none; transition: all 0.3s ease; }
+        .tour-highlight { position: absolute; box-shadow: 0 0 0 4px var(--accent-clarity), 0 0 30px rgba(232,197,71,0.6); border-radius: 8px; z-index: 1001; pointer-events: none; transition: all 0.3s ease; background: var(--bg-surface); overflow: hidden; }
+        .tour-overlay.active ~ .app .sidebar { position: relative; }
+        .tour-clone { position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 1001; }
         .tour-tooltip { position: absolute; background: var(--bg-surface); border: 1px solid var(--accent-clarity); border-radius: 12px; padding: 20px; max-width: 320px; z-index: 1002; animation: tourPop 0.3s ease; }
         @keyframes tourPop { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
         .tour-step { font-size: 10px; color: var(--accent-clarity); font-weight: 600; text-transform: uppercase; margin-bottom: 8px; }
@@ -917,7 +919,7 @@ function renderTourStep() {
     const highlight = document.getElementById('tour-highlight');
     const tooltip = document.getElementById('tour-tooltip');
 
-    // Position highlight
+    // Position highlight and clone content
     if (target) {
         const rect = target.getBoundingClientRect();
         highlight.style.top = (rect.top - 4) + 'px';
@@ -925,13 +927,22 @@ function renderTourStep() {
         highlight.style.width = (rect.width + 8) + 'px';
         highlight.style.height = (rect.height + 8) + 'px';
 
+        // Clone the element content into highlight
+        const clone = target.cloneNode(true);
+        clone.style.margin = '4px';
+        clone.style.width = rect.width + 'px';
+        clone.style.height = rect.height + 'px';
+        highlight.innerHTML = '';
+        highlight.appendChild(clone);
+
         // Position tooltip
+        const tooltipWidth = 320;
         if (step.pos === 'right') {
-            tooltip.style.top = rect.top + 'px';
+            tooltip.style.top = Math.max(20, rect.top) + 'px';
             tooltip.style.left = (rect.right + 20) + 'px';
             tooltip.style.right = 'auto';
         } else {
-            tooltip.style.top = rect.top + 'px';
+            tooltip.style.top = Math.max(20, rect.top) + 'px';
             tooltip.style.right = (window.innerWidth - rect.left + 20) + 'px';
             tooltip.style.left = 'auto';
         }
