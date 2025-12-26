@@ -23,7 +23,8 @@
 
         /* Header */
         header { padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; }
-        .logo { font-family: 'Instrument Serif', serif; font-size: 24px; }
+        .logo { font-family: 'Instrument Serif', serif; font-size: 24px; display: flex; align-items: center; gap: 12px; }
+        .logo img { width: 32px; height: 32px; border-radius: 6px; }
         .logo span { color: var(--accent); }
         nav { display: flex; gap: 32px; align-items: center; }
         nav a { color: var(--text-secondary); text-decoration: none; font-size: 14px; transition: color 0.2s; }
@@ -106,6 +107,18 @@
         .btn-sponsor { background: #db61a2; color: white; }
         .btn-sponsor:hover { background: #c94d8f; transform: translateY(-1px); }
 
+        /* Newsletter */
+        .newsletter { padding: 60px 40px; background: var(--surface); text-align: center; }
+        .newsletter h2 { font-family: 'Instrument Serif', serif; font-size: 32px; margin-bottom: 12px; }
+        .newsletter > p { color: var(--text-secondary); margin-bottom: 24px; max-width: 500px; margin-left: auto; margin-right: auto; }
+        .newsletter-form { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; max-width: 500px; margin: 0 auto; }
+        .newsletter-form input[type="email"] { flex: 1; min-width: 240px; padding: 14px 18px; border-radius: 8px; border: 1px solid #333; background: var(--bg); color: var(--text); font-size: 14px; }
+        .newsletter-form input[type="email"]:focus { outline: none; border-color: var(--accent); }
+        .newsletter-form input[type="email"]::placeholder { color: var(--text-secondary); }
+        .btn-newsletter { background: var(--accent); color: var(--bg); white-space: nowrap; }
+        .btn-newsletter:hover { background: #f0d05a; transform: translateY(-1px); }
+        .newsletter-note { margin-top: 12px; font-size: 12px; color: var(--text-secondary); opacity: 0.7; }
+
         /* Footer */
         footer { padding: 40px; text-align: center; border-top: 1px solid #1f1f24; }
         footer p { color: var(--text-secondary); font-size: 13px; margin-bottom: 8px; }
@@ -124,7 +137,10 @@
 </head>
 <body>
     <header>
-        <div class="logo">Clarity <span>Engine</span></div>
+        <a href="https://berta.one" target="_blank" class="logo" style="text-decoration:none;color:inherit;">
+            <img src="https://berta.one/favicon.png" alt="Berta.one">
+            Clarity <span>Engine</span>
+        </a>
         <nav>
             <a href="#features">Features</a>
             <a href="#how">How It Works</a>
@@ -275,6 +291,17 @@
             <a href="https://ko-fi.com/bertaone" target="_blank" class="btn btn-kofi">☕ Buy Me a Coffee</a>
             <a href="https://github.com/sponsors/luigipascal" target="_blank" class="btn btn-sponsor">💖 GitHub Sponsors</a>
         </div>
+    </section>
+
+    <section class="newsletter">
+        <img src="https://berta.one/favicon.png" alt="Berta.one" style="width:48px;height:48px;border-radius:10px;margin-bottom:16px;">
+        <h2>Stay in the Loop</h2>
+        <p>Get updates on new thinking tools, AI tips, and productivity insights from Berta.one.</p>
+        <form class="newsletter-form" action="https://berta.one/subscribe" method="POST" target="_blank">
+            <input type="email" name="email" placeholder="Enter your email" required>
+            <button type="submit" class="btn btn-newsletter">Subscribe</button>
+        </form>
+        <p class="newsletter-note">No spam. Unsubscribe anytime.</p>
     </section>
 
     <footer>
