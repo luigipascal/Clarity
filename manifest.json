@@ -1,0 +1,43 @@
+{
+  "name": "Clarity Engine",
+  "short_name": "Clarity",
+  "description": "AI-powered thinking tool. Break down goals, surface hidden assumptions, and think more clearly.",
+  "start_url": "/clarity-engine-v2.html",
+  "display": "standalone",
+  "background_color": "#0a0a0b",
+  "theme_color": "#e8c547",
+  "orientation": "any",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "utilities", "business"],
+  "screenshots": [
+    {
+      "src": "screenshots/desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Clarity Engine Desktop View"
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}
