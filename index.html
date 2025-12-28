@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clarity Engine - AI-Powered Thinking Tool</title>
     <meta name="description" content="Think once. Build right. An AI-powered tool to break down goals, surface hidden assumptions, and think more clearly.">
+
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#e8c547">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Clarity">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -356,6 +366,15 @@
         btn.disabled = false;
         btn.textContent = 'Subscribe';
         return false;
+    }
+
+    // Register Service Worker for PWA
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('service-worker.js')
+                .then(reg => console.log('Clarity Engine: Service Worker registered'))
+                .catch(err => console.log('Clarity Engine: Service Worker failed', err));
+        });
     }
     </script>
 

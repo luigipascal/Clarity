@@ -4,6 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Clarity Engine</title>
+
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="AI-powered thinking tool. Break down goals, surface hidden assumptions, and think more clearly.">
+    <meta name="theme-color" content="#e8c547">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Clarity">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -41,6 +52,8 @@
         .nav-item .label { font-size: 12px; color: var(--text-secondary); }
         .nav-item.active .label { color: var(--text-primary); }
         .nav-item .badge { margin-left: auto; font-size: 9px; padding: 2px 5px; background: var(--bg-hover); border-radius: 8px; color: var(--text-muted); }
+        .nav-item.pro-tool { opacity: 0.85; }
+        .nav-item.pro-tool:hover { opacity: 1; background: linear-gradient(90deg, var(--bg-hover), transparent); }
         .sidebar-footer { margin-top: auto; padding: 16px; border-top: 1px solid var(--border-subtle); }
         .ai-toggle { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: var(--bg-elevated); border-radius: 6px; cursor: pointer; font-size: 11px; color: var(--text-secondary); }
         
@@ -243,6 +256,12 @@
             <div class="nav-section">
                 <div class="nav-title">Config</div>
                 <div class="nav-item" data-mode="settings" onclick="switchMode('settings')"><div class="icon">⚙</div><span class="label">AI Settings</span></div>
+            </div>
+            <div class="nav-section">
+                <div class="nav-title">Pro Tools</div>
+                <a href="https://berta.one/periscope" target="_blank" class="nav-item pro-tool" style="text-decoration:none" title="Professional Web Crawler - Extract content from any website"><div class="icon" style="background:rgba(125,211,252,0.15);color:#7dd3fc">🔭</div><span class="label">Periscope</span><span class="badge" style="background:#7dd3fc;color:#0a0a0b">PRO</span></a>
+                <a href="https://berta.one/insight" target="_blank" class="nav-item pro-tool" style="text-decoration:none" title="AI Website Analysis - Deep analysis of crawled sites"><div class="icon" style="background:rgba(167,139,250,0.15);color:#a78bfa">🔍</div><span class="label">Insight</span><span class="badge" style="background:#a78bfa;color:#0a0a0b">PRO</span></a>
+                <a href="https://berta.one/builder" target="_blank" class="nav-item pro-tool" style="text-decoration:none" title="AI Site Generator - Reproduce sites from crawled data"><div class="icon" style="background:rgba(74,222,128,0.15);color:#4ade80">🏗️</div><span class="label">Builder</span><span class="badge" style="background:#4ade80;color:#0a0a0b">PRO</span></a>
             </div>
             <div class="nav-section">
                 <div class="nav-title">Help</div>
@@ -1520,6 +1539,15 @@ async function testAIConnection() {
 document.addEventListener('DOMContentLoaded', () => {
     setTimeout(initSettings, 100);
 });
+
+// Register Service Worker for PWA
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js')
+            .then(reg => console.log('Clarity Engine: Service Worker registered', reg.scope))
+            .catch(err => console.log('Clarity Engine: Service Worker failed', err));
+    });
+}
 </script>
 </body>
 </html>
