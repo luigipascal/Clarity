@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clarity Engine - AI-Powered Thinking Tool</title>
+    <title>Berta1Clarity - AI-Powered Thinking Tool</title>
     <meta name="description" content="Think once. Build right. An AI-powered tool to break down goals, surface hidden assumptions, and think more clearly.">
 
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#e8c547">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Clarity">
+    <meta name="apple-mobile-web-app-title" content="Berta1Clarity">
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
     <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -137,11 +137,24 @@
         .footer-links { display: flex; gap: 24px; justify-content: center; margin-top: 16px; }
         .footer-links a { font-size: 12px; }
 
+        /* Pro Tools */
+        .pro-tools { padding: 60px 40px; text-align: center; border-top: 1px solid #1f1f24; }
+        .pro-tools h2 { font-family: 'Instrument Serif', serif; font-size: 28px; margin-bottom: 8px; }
+        .pro-tools > p { color: var(--text-secondary); margin-bottom: 32px; font-size: 14px; }
+        .tools-grid { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
+        .tool-card { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 24px 32px; background: var(--surface); border: 1px solid #1f1f24; border-radius: 12px; text-decoration: none; transition: all 0.2s; min-width: 160px; }
+        .tool-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+        .tool-icon { font-size: 32px; }
+        .tool-name { font-size: 16px; font-weight: 600; color: var(--text); }
+        .tool-desc { font-size: 12px; color: var(--text-secondary); }
+
         @media (max-width: 768px) {
             .hero h1 { font-size: 40px; }
             header { padding: 16px 20px; flex-direction: column; gap: 16px; }
             nav { gap: 16px; }
             .features, .how, .ai-section, .pricing, .cta { padding: 60px 20px; }
+            .pro-tools { padding: 40px 20px; }
+            .tool-card { min-width: 140px; padding: 20px 24px; }
         }
     </style>
 </head>
@@ -149,13 +162,14 @@
     <header>
         <a href="https://berta.one" target="_blank" class="logo" style="text-decoration:none;color:inherit;">
             <img src="https://berta.one/favicon.png" alt="Berta.one">
-            Clarity <span>Engine</span>
+            Berta1<span>Clarity</span>
         </a>
         <nav>
             <a href="#features">Features</a>
             <a href="#how">How It Works</a>
-            <a href="#pricing">Pricing</a>
-            <a href="clarity-engine-v2.html" class="btn btn-primary">Launch App →</a>
+            <a href="pricing.html">Pricing</a>
+            <a href="login.html">Login</a>
+            <a href="clarity-engine-v2.html" class="btn btn-primary">Launch Berta1Clarity →</a>
         </nav>
     </header>
 
@@ -163,10 +177,10 @@
         <h1>Think once.<br><span>Build right.</span></h1>
         <p>An AI-powered thinking tool that helps you break down goals, surface hidden assumptions, and create clarity before you create chaos.</p>
         <div class="hero-buttons">
-            <a href="clarity-engine-v2.html" class="btn btn-primary">Launch Clarity Engine →</a>
+            <a href="clarity-engine-v2.html" class="btn btn-primary">Launch Berta1Clarity →</a>
             <a href="#features" class="btn btn-secondary">See Features</a>
         </div>
-        <p class="hero-note">Free & open source. Bring your own AI key (OpenAI, Anthropic, or Google).</p>
+        <p class="hero-note">Free to use. Bring your own AI key (OpenAI, Anthropic, or Google).</p>
     </section>
 
     <section class="features" id="features">
@@ -267,36 +281,78 @@
     </section>
 
     <section class="pricing" id="pricing">
-        <div class="pricing-inner">
+        <div class="pricing-inner" style="max-width: 900px;">
             <h2>Simple Pricing</h2>
-            <p>The tool is free. You just pay for the AI you use.</p>
-            <div class="price-card">
-                <div class="price-label">Clarity Engine</div>
-                <div class="price">Free</div>
-                <div class="price-note">You pay only for AI API usage (~$0.01-0.05 per query)</div>
-                <ul class="price-features">
-                    <li>All 7 thinking modules</li>
-                    <li>AI-powered analysis & suggestions</li>
-                    <li>Export to Markdown, PDF, JSON</li>
-                    <li>AI Summary Reports</li>
-                    <li>Local storage (your data stays private)</li>
-                    <li>Works offline (except AI features)</li>
-                    <li>Open source on GitHub</li>
-                </ul>
-                <a href="clarity-engine-v2.html" class="btn btn-primary" style="width:100%;justify-content:center">Launch Clarity Engine →</a>
+            <p>Free forever. Pay once for premium features. <strong>AI not included</strong> – you bring your own API key.</p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 40px;">
+                <!-- Free -->
+                <div class="price-card" style="padding: 24px; text-align: left;">
+                    <div class="price-label">Free</div>
+                    <div class="price" style="font-size: 36px;">$0</div>
+                    <div class="price-note">Forever</div>
+                    <ul class="price-features" style="margin-top: 16px; font-size: 13px;">
+                        <li>All 7 modules</li>
+                        <li>Local storage</li>
+                        <li>Markdown export</li>
+                        <li>3 projects max</li>
+                    </ul>
+                    <a href="clarity-engine-v2.html" class="btn btn-secondary" style="width:100%;margin-top:16px;font-size:13px;">Get Started</a>
+                </div>
+                <!-- Starter -->
+                <div class="price-card" style="padding: 24px; text-align: left;">
+                    <div class="price-label" style="color: #7dd3fc;">Starter</div>
+                    <div class="price" style="font-size: 36px;">$49</div>
+                    <div class="price-note">One-time</div>
+                    <ul class="price-features" style="margin-top: 16px; font-size: 13px;">
+                        <li>Cloud sync</li>
+                        <li>PDF reports</li>
+                        <li>10 projects</li>
+                        <li>Email support</li>
+                    </ul>
+                    <a href="pricing.html" class="btn btn-secondary" style="width:100%;margin-top:16px;font-size:13px;">Get Starter</a>
+                </div>
+                <!-- Pro -->
+                <div class="price-card" style="padding: 24px; text-align: left; border-color: var(--accent);">
+                    <div class="price-label">Pro ⭐</div>
+                    <div class="price" style="font-size: 36px;">$99</div>
+                    <div class="price-note">One-time</div>
+                    <ul class="price-features" style="margin-top: 16px; font-size: 13px;">
+                        <li>AI Summary</li>
+                        <li>Unlimited projects</li>
+                        <li>3 devices</li>
+                        <li>Priority support</li>
+                    </ul>
+                    <a href="pricing.html" class="btn btn-primary" style="width:100%;margin-top:16px;font-size:13px;">Get Pro</a>
+                </div>
+                <!-- Agency -->
+                <div class="price-card" style="padding: 24px; text-align: left;">
+                    <div class="price-label" style="color: #4ade80;">Agency</div>
+                    <div class="price" style="font-size: 36px;">$249</div>
+                    <div class="price-note">One-time</div>
+                    <ul class="price-features" style="margin-top: 16px; font-size: 13px;">
+                        <li>10 team members</li>
+                        <li>Shared projects</li>
+                        <li>Unlimited devices</li>
+                        <li>Lifetime updates</li>
+                    </ul>
+                    <a href="pricing.html" class="btn btn-secondary" style="width:100%;margin-top:16px;font-size:13px;">Get Agency</a>
+                </div>
             </div>
+            <p style="margin-top: 24px; font-size: 13px; color: var(--text-secondary);">
+                <a href="pricing.html" style="color: var(--accent);">See full comparison →</a>
+            </p>
         </div>
     </section>
 
     <section class="cta">
         <h2>Ready to think clearly?</h2>
         <p>Stop planning in circles. Start building on solid foundations.</p>
-        <a href="clarity-engine-v2.html" class="btn btn-primary">Launch Clarity Engine →</a>
+        <a href="clarity-engine-v2.html" class="btn btn-primary">Launch Berta1Clarity →</a>
     </section>
 
     <section class="support">
         <h2>Support This Project</h2>
-        <p>Clarity Engine is free and open source. If it helps you think better, consider supporting its development.</p>
+        <p>Berta1Clarity is free to use. If it helps you think better, consider supporting its development.</p>
         <div class="support-buttons">
             <a href="https://ko-fi.com/bertaone" target="_blank" class="btn btn-kofi">☕ Buy Me a Coffee</a>
             <a href="https://github.com/sponsors/luigipascal" target="_blank" class="btn btn-sponsor">💖 GitHub Sponsors</a>
@@ -322,42 +378,23 @@
         btn.disabled = true;
         btn.textContent = 'Subscribing...';
         try {
-            const res = await fetch('https://api.brevo.com/v3/contacts', {
+            const res = await fetch('/api/newsletter/subscribe', {
                 method: 'POST',
-                headers: {
-                    'api-key': '***REMOVED***',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    email: email,
-                    listIds: [16],
-                    updateEnabled: true
-                })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
             });
-            if (res.ok || res.status === 201 || res.status === 204) {
-                // Send welcome email
-                await fetch('https://api.brevo.com/v3/smtp/email', {
-                    method: 'POST',
-                    headers: {
-                        'api-key': '***REMOVED***',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        templateId: 36,
-                        to: [{ email: email }]
-                    })
-                });
-                status.textContent = 'Subscribed! Check your email.';
-                status.style.color = '#4ade80';
-                document.getElementById('newsletter-email').value = '';
-            } else {
-                const data = await res.json();
-                if (data.code === 'duplicate_parameter') {
-                    status.textContent = 'You\'re already subscribed!';
+            const data = await res.json();
+            if (data.success) {
+                if (data.duplicate) {
+                    status.textContent = "You're already subscribed!";
                     status.style.color = '#7dd3fc';
                 } else {
-                    throw new Error(data.message || 'Subscription failed');
+                    status.textContent = 'Subscribed! Check your email.';
+                    status.style.color = '#4ade80';
+                    document.getElementById('newsletter-email').value = '';
                 }
+            } else {
+                throw new Error(data.error || 'Subscription failed');
             }
         } catch (err) {
             status.textContent = 'Error: ' + err.message;
@@ -372,19 +409,43 @@
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('service-worker.js')
-                .then(reg => console.log('Clarity Engine: Service Worker registered'))
-                .catch(err => console.log('Clarity Engine: Service Worker failed', err));
+                .then(reg => console.log('Berta1Clarity: Service Worker registered'))
+                .catch(err => console.log('Berta1Clarity: Service Worker failed', err));
         });
     }
     </script>
 
+    <!-- Pro Tools -->
+    <section class="pro-tools">
+        <h2>Pro Tools from Berta.one</h2>
+        <p>Professional desktop tools for web crawling and AI analysis.</p>
+        <div class="tools-grid">
+            <a href="https://berta.one/periscope" target="_blank" class="tool-card">
+                <span class="tool-icon">🔭</span>
+                <span class="tool-name">Berta1Periscope</span>
+                <span class="tool-desc">Visual Web Crawler</span>
+            </a>
+            <a href="https://berta.one/insight" target="_blank" class="tool-card">
+                <span class="tool-icon">🔍</span>
+                <span class="tool-name">Berta1Insight</span>
+                <span class="tool-desc">AI-Powered Analysis</span>
+            </a>
+            <a href="https://berta.one/builder" target="_blank" class="tool-card">
+                <span class="tool-icon">🏗️</span>
+                <span class="tool-name">Berta1Builder</span>
+                <span class="tool-desc">AI Site Generator</span>
+            </a>
+        </div>
+        <a href="https://berta.one" target="_blank" class="btn btn-secondary" style="margin-top: 24px;">View All Pro Tools →</a>
+    </section>
+
     <footer>
-        <p>Built with care. <a href="https://github.com/luigipascal/Clarity" target="_blank">View on GitHub</a></p>
-        <p class="footer-brand">A <a href="https://berta.one" target="_blank">Berta.one</a> project by <a href="https://rondanini.com" target="_blank">Rondanini Publishing</a></p>
+        <p>Built with care by <a href="https://rondanini.com" target="_blank">Rondanini Publishing</a></p>
+        <p class="footer-brand">A <a href="https://berta.one" target="_blank">Berta.one</a> project</p>
         <div class="footer-links">
-            <a href="https://ko-fi.com/bertaone" target="_blank">Ko-fi</a>
-            <a href="https://github.com/sponsors/luigipascal" target="_blank">Sponsor</a>
-            <a href="https://github.com/luigipascal/Clarity" target="_blank">GitHub</a>
+            <a href="https://ko-fi.com/bertaone" target="_blank">Support</a>
+            <a href="https://berta.one" target="_blank">Pro Tools</a>
+            <a href="mailto:hello@berta.one">Contact</a>
         </div>
     </footer>
 </body>

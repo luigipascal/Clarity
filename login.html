@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Berta1Clarity</title>
+    <meta name="description" content="Sign in to Berta1Clarity with a magic link. No password needed.">
+
+    <meta name="theme-color" content="#e8c547">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0b;
+            --surface: #141416;
+            --text: #f5f5f4;
+            --text-secondary: #a1a1a6;
+            --accent: #e8c547;
+            --green: #4ade80;
+            --red: #f87171;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-family: 'Instrument Serif', serif;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: inherit;
+        }
+        .logo img { width: 32px; height: 32px; border-radius: 6px; }
+        .logo span { color: var(--accent); }
+
+        main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .login-card {
+            background: var(--surface);
+            border: 1px solid #1f1f24;
+            border-radius: 16px;
+            padding: 48px;
+            max-width: 420px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .login-card h1 {
+            font-family: 'Instrument Serif', serif;
+            font-size: 32px;
+            font-weight: 400;
+            margin-bottom: 12px;
+        }
+
+        .login-card p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 32px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 16px;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .form-group input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 14px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--bg);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #f0d05a;
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .status {
+            margin-top: 16px;
+            font-size: 14px;
+            padding: 12px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .status.success {
+            display: block;
+            background: rgba(74, 222, 128, 0.1);
+            color: var(--green);
+            border: 1px solid rgba(74, 222, 128, 0.2);
+        }
+
+        .status.error {
+            display: block;
+            background: rgba(248, 113, 113, 0.1);
+            color: var(--red);
+            border: 1px solid rgba(248, 113, 113, 0.2);
+        }
+
+        .divider {
+            margin: 32px 0;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #333;
+        }
+
+        .features {
+            text-align: left;
+            margin-top: 24px;
+        }
+
+        .features h3 {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+
+        .features ul {
+            list-style: none;
+        }
+
+        .features li {
+            font-size: 13px;
+            color: var(--text-secondary);
+            padding: 6px 0;
+        }
+
+        .features li::before {
+            content: "✓";
+            color: var(--green);
+            margin-right: 8px;
+        }
+
+        .back-link {
+            display: block;
+            margin-top: 24px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            color: var(--accent);
+        }
+
+        @media (max-width: 600px) {
+            .login-card {
+                padding: 32px 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="index.html" class="logo">
+            <img src="https://berta.one/favicon.png" alt="Berta.one">
+            Berta1<span>Clarity</span>
+        </a>
+    </header>
+
+    <main>
+        <div class="login-card">
+            <h1>Welcome back</h1>
+            <p>Sign in with a magic link. No password needed.</p>
+
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="email">Email address</label>
+                    <input type="email" id="email" name="email" placeholder="you@example.com" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="submit-btn">
+                    Send Magic Link
+                </button>
+            </form>
+
+            <div id="status" class="status"></div>
+
+            <div class="divider">or</div>
+
+            <a href="clarity-engine-v2.html" class="btn" style="background: transparent; border: 1px solid #333; color: var(--text);">
+                Continue without account
+            </a>
+
+            <div class="features">
+                <h3>Why create an account?</h3>
+                <ul>
+                    <li>Sync projects across devices</li>
+                    <li>Access PDF and AI reports</li>
+                    <li>Never lose your work</li>
+                </ul>
+            </div>
+
+            <a href="index.html" class="back-link">← Back to home</a>
+        </div>
+    </main>
+
+    <script>
+    // Check for error in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const errorMsg = urlParams.get('error');
+    if (errorMsg) {
+        const status = document.getElementById('status');
+        status.textContent = errorMsg;
+        status.className = 'status error';
+    }
+
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const email = document.getElementById('email').value;
+        const btn = document.getElementById('submit-btn');
+        const status = document.getElementById('status');
+
+        btn.disabled = true;
+        btn.textContent = 'Sending...';
+        status.className = 'status';
+
+        try {
+            const res = await fetch('/api/auth/send-magic-link', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+                status.textContent = '✓ Magic link sent! Check your email and click the link to sign in.';
+                status.className = 'status success';
+                btn.textContent = 'Link Sent!';
+            } else {
+                throw new Error(data.error || 'Failed to send magic link');
+            }
+        } catch (err) {
+            status.textContent = err.message;
+            status.className = 'status error';
+            btn.disabled = false;
+            btn.textContent = 'Send Magic Link';
+        }
+    });
+    </script>
+</body>
+</html>
