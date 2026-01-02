@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account - Berta1Clarity</title>
+    <meta name="description" content="Manage your Berta1Clarity account, license, and settings.">
+
+    <meta name="theme-color" content="#e8c547">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0b;
+            --surface: #141416;
+            --text: #f5f5f4;
+            --text-secondary: #a1a1a6;
+            --accent: #e8c547;
+            --green: #4ade80;
+            --blue: #7dd3fc;
+            --red: #f87171;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        header {
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .logo {
+            font-family: 'Instrument Serif', serif;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: inherit;
+        }
+        .logo img { width: 32px; height: 32px; border-radius: 6px; }
+        .logo span { color: var(--accent); }
+        nav { display: flex; gap: 24px; align-items: center; }
+        nav a { color: var(--text-secondary); text-decoration: none; font-size: 14px; }
+        nav a:hover { color: var(--text); }
+
+        main {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        h1 {
+            font-family: 'Instrument Serif', serif;
+            font-size: 36px;
+            font-weight: 400;
+            margin-bottom: 32px;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid #1f1f24;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .card h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #1f1f24;
+        }
+
+        .card-row:last-child {
+            border-bottom: none;
+        }
+
+        .card-row .label {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .card-row .value {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-free {
+            background: rgba(161, 161, 166, 0.2);
+            color: var(--text-secondary);
+        }
+
+        .badge-starter {
+            background: rgba(125, 211, 252, 0.2);
+            color: var(--blue);
+        }
+
+        .badge-pro {
+            background: rgba(232, 197, 71, 0.2);
+            color: var(--accent);
+        }
+
+        .badge-agency {
+            background: rgba(74, 222, 128, 0.2);
+            color: var(--green);
+        }
+
+        .license-key {
+            font-family: monospace;
+            background: var(--bg);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--bg);
+        }
+
+        .btn-primary:hover {
+            background: #f0d05a;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text);
+            border: 1px solid #333;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent);
+        }
+
+        .btn-danger {
+            background: transparent;
+            color: var(--red);
+            border: 1px solid rgba(248, 113, 113, 0.3);
+        }
+
+        .btn-danger:hover {
+            background: rgba(248, 113, 113, 0.1);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .not-logged-in {
+            text-align: center;
+            padding: 60px 40px;
+        }
+
+        .not-logged-in h2 {
+            font-family: 'Instrument Serif', serif;
+            font-size: 28px;
+            margin-bottom: 16px;
+        }
+
+        .not-logged-in p {
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+
+        .success-banner {
+            background: rgba(74, 222, 128, 0.1);
+            border: 1px solid rgba(74, 222, 128, 0.2);
+            color: var(--green);
+            padding: 16px 24px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 600px) {
+            main { padding: 24px; }
+            .card { padding: 16px; }
+            .card-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="index.html" class="logo">
+            <img src="https://berta.one/favicon.png" alt="Berta.one">
+            Berta1<span>Clarity</span>
+        </a>
+        <nav>
+            <a href="clarity-engine-v2.html">Launch App</a>
+            <a href="pricing.html">Pricing</a>
+            <a href="#" id="logout-link" style="display:none;">Logout</a>
+        </nav>
+    </header>
+
+    <main>
+        <div id="loading" class="loading">Loading...</div>
+
+        <div id="not-logged-in" class="not-logged-in" style="display:none;">
+            <h2>Not signed in</h2>
+            <p>Sign in to view your account and manage your license.</p>
+            <a href="login.html" class="btn btn-primary">Sign In</a>
+        </div>
+
+        <div id="account-content" style="display:none;">
+            <div id="success-banner" class="success-banner" style="display:none;">
+                Purchase successful! Your license is now active.
+            </div>
+
+            <h1>Your Account</h1>
+
+            <!-- Profile -->
+            <div class="card">
+                <h2>Profile</h2>
+                <div class="card-row">
+                    <span class="label">Email</span>
+                    <span class="value" id="user-email">-</span>
+                </div>
+                <div class="card-row">
+                    <span class="label">Account created</span>
+                    <span class="value" id="user-created">-</span>
+                </div>
+            </div>
+
+            <!-- License -->
+            <div class="card">
+                <h2>License</h2>
+                <div class="card-row">
+                    <span class="label">Current Plan</span>
+                    <span class="value"><span id="user-tier" class="badge badge-free">FREE</span></span>
+                </div>
+                <div class="card-row" id="license-key-row" style="display:none;">
+                    <span class="label">License Key</span>
+                    <span class="value license-key" id="user-license-key">-</span>
+                </div>
+                <div class="card-row" id="updates-row" style="display:none;">
+                    <span class="label">Updates Until</span>
+                    <span class="value" id="user-updates">-</span>
+                </div>
+
+                <div class="btn-group" id="upgrade-group">
+                    <a href="pricing.html" class="btn btn-primary">Upgrade Plan</a>
+                </div>
+            </div>
+
+            <!-- Features -->
+            <div class="card">
+                <h2>Your Features</h2>
+                <div class="card-row">
+                    <span class="label">Cloud Sync</span>
+                    <span class="value" id="feat-sync">-</span>
+                </div>
+                <div class="card-row">
+                    <span class="label">PDF Export</span>
+                    <span class="value" id="feat-pdf">-</span>
+                </div>
+                <div class="card-row">
+                    <span class="label">AI Summary</span>
+                    <span class="value" id="feat-ai">-</span>
+                </div>
+                <div class="card-row">
+                    <span class="label">Projects</span>
+                    <span class="value" id="feat-projects">-</span>
+                </div>
+                <div class="card-row">
+                    <span class="label">Devices</span>
+                    <span class="value" id="feat-devices">-</span>
+                </div>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="card">
+                <h2 style="color: var(--red);">Danger Zone</h2>
+                <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 16px;">
+                    Sign out of your account. Your local data will remain on this device.
+                </p>
+                <button class="btn btn-danger" id="logout-btn">Sign Out</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+    const tierNames = {
+        free: 'FREE',
+        starter: 'STARTER',
+        pro: 'PRO',
+        agency: 'AGENCY'
+    };
+
+    const tierClasses = {
+        free: 'badge-free',
+        starter: 'badge-starter',
+        pro: 'badge-pro',
+        agency: 'badge-agency'
+    };
+
+    async function loadAccount() {
+        try {
+            const res = await fetch('/api/auth/me');
+            const data = await res.json();
+
+            document.getElementById('loading').style.display = 'none';
+
+            if (!data.authenticated) {
+                document.getElementById('not-logged-in').style.display = 'block';
+                return;
+            }
+
+            document.getElementById('account-content').style.display = 'block';
+            document.getElementById('logout-link').style.display = 'block';
+
+            const user = data.user;
+
+            // Profile
+            document.getElementById('user-email').textContent = user.email;
+
+            // Get license details
+            const licenseRes = await fetch('/api/license/check', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: user.email })
+            });
+            const license = await licenseRes.json();
+
+            // Tier badge
+            const tier = license.tier || 'free';
+            const tierBadge = document.getElementById('user-tier');
+            tierBadge.textContent = tierNames[tier] || tier.toUpperCase();
+            tierBadge.className = `badge ${tierClasses[tier] || 'badge-free'}`;
+
+            // License key
+            if (license.license_key) {
+                document.getElementById('license-key-row').style.display = 'flex';
+                document.getElementById('user-license-key').textContent = license.license_key;
+            }
+
+            // Updates
+            if (license.updates_until) {
+                document.getElementById('updates-row').style.display = 'flex';
+                const date = new Date(license.updates_until);
+                if (date.getFullYear() >= 2099) {
+                    document.getElementById('user-updates').textContent = 'Lifetime';
+                } else {
+                    document.getElementById('user-updates').textContent = date.toLocaleDateString();
+                }
+            }
+
+            // Hide upgrade button for paid users
+            if (tier !== 'free') {
+                document.getElementById('upgrade-group').style.display = 'none';
+            }
+
+            // Features
+            const limits = license.limits || {};
+            document.getElementById('feat-sync').textContent = limits.cloudSync ? '✓ Enabled' : '✗ Free tier';
+            document.getElementById('feat-sync').style.color = limits.cloudSync ? 'var(--green)' : 'var(--text-secondary)';
+
+            document.getElementById('feat-pdf').textContent = limits.pdfExport ? '✓ Enabled' : '✗ Free tier';
+            document.getElementById('feat-pdf').style.color = limits.pdfExport ? 'var(--green)' : 'var(--text-secondary)';
+
+            document.getElementById('feat-ai').textContent = limits.aiSummary ? '✓ Enabled' : '✗ Pro+ only';
+            document.getElementById('feat-ai').style.color = limits.aiSummary ? 'var(--green)' : 'var(--text-secondary)';
+
+            document.getElementById('feat-projects').textContent = limits.projects === -1 ? 'Unlimited' : `${limits.projects} max`;
+            document.getElementById('feat-devices').textContent = limits.devices === -1 ? 'Unlimited' : `${limits.devices} max`;
+
+            // Check for purchase success
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('purchase') === 'success') {
+                document.getElementById('success-banner').style.display = 'block';
+            }
+
+        } catch (err) {
+            console.error('Failed to load account:', err);
+            document.getElementById('loading').textContent = 'Failed to load account';
+        }
+    }
+
+    async function logout() {
+        try {
+            await fetch('/api/auth/logout', { method: 'POST' });
+            window.location.href = 'index.html';
+        } catch (err) {
+            console.error('Logout failed:', err);
+        }
+    }
+
+    document.getElementById('logout-btn').addEventListener('click', logout);
+    document.getElementById('logout-link').addEventListener('click', (e) => {
+        e.preventDefault();
+        logout();
+    });
+
+    loadAccount();
+    </script>
+</body>
+</html>

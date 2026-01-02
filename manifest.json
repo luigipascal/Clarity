@@ -1,6 +1,6 @@
 {
-  "name": "Clarity Engine",
-  "short_name": "Clarity",
+  "name": "Berta1Clarity",
+  "short_name": "Berta1Clarity",
   "description": "AI-powered thinking tool. Break down goals, surface hidden assumptions, and think more clearly.",
   "start_url": "/clarity-engine-v2.html",
   "display": "standalone",
@@ -35,7 +35,7 @@
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "Clarity Engine Desktop View"
+      "label": "Berta1Clarity Desktop View"
     }
   ],
   "related_applications": [],

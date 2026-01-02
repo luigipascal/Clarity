@@ -1,4 +1,4 @@
-# Clarity Engine
+# Berta1Clarity
 
 **Think once. Build right.**
 
@@ -44,14 +44,14 @@ The tool is **free**. You only pay for the AI API calls you make (~$0.01-0.05 pe
 
 ## Support
 
-If Clarity Engine helps you think better, consider supporting its development:
+If Berta1Clarity helps you think better, consider supporting its development:
 
 - [Ko-fi](https://ko-fi.com/bertaone)
 - [GitHub Sponsors](https://github.com/sponsors/luigipascal)
 
 ## License
 
-MIT License - see [LICENSE](LICENSE)
+Free to use for personal and commercial purposes.
 
 ---
 

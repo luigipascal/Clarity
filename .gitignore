@@ -3,3 +3,14 @@
 
 # Claude Code settings
 .claude/
+
+# Environment variables (NEVER commit)
+.env
+.env.local
+.env*.local
+
+# Dependencies
+node_modules/
+
+# Vercel
+.vercel/

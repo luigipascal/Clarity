@@ -1,4 +1,4 @@
-const CACHE_NAME = 'clarity-engine-v1';
+const CACHE_NAME = 'berta1clarity-v1';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -15,7 +15,7 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('Clarity Engine: Caching app shell');
+        console.log('Berta1Clarity: Caching app shell');
         return cache.addAll(ASSETS_TO_CACHE);
       })
       .then(() => self.skipWaiting())

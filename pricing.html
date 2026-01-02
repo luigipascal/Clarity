@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing - Berta1Clarity</title>
+    <meta name="description" content="Choose your Berta1Clarity plan. Free forever with optional upgrades for cloud sync and team features.">
+
+    <meta name="theme-color" content="#e8c547">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0b;
+            --surface: #141416;
+            --text: #f5f5f4;
+            --text-secondary: #a1a1a6;
+            --accent: #e8c547;
+            --green: #4ade80;
+            --blue: #7dd3fc;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        header {
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .logo {
+            font-family: 'Instrument Serif', serif;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: inherit;
+        }
+        .logo img { width: 32px; height: 32px; border-radius: 6px; }
+        .logo span { color: var(--accent); }
+        nav { display: flex; gap: 24px; align-items: center; }
+        nav a { color: var(--text-secondary); text-decoration: none; font-size: 14px; }
+        nav a:hover { color: var(--text); }
+
+        .hero {
+            text-align: center;
+            padding: 60px 40px 40px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .hero h1 {
+            font-family: 'Instrument Serif', serif;
+            font-size: 48px;
+            font-weight: 400;
+            margin-bottom: 16px;
+        }
+        .hero h1 span { color: var(--accent); }
+        .hero p {
+            font-size: 18px;
+            color: var(--text-secondary);
+        }
+
+        .ai-note {
+            background: rgba(125, 211, 252, 0.1);
+            border: 1px solid rgba(125, 211, 252, 0.2);
+            border-radius: 12px;
+            padding: 16px 24px;
+            max-width: 600px;
+            margin: 32px auto;
+            text-align: center;
+        }
+        .ai-note strong { color: var(--blue); }
+        .ai-note p { font-size: 14px; color: var(--text-secondary); margin: 0; }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        .price-card {
+            background: var(--surface);
+            border: 1px solid #1f1f24;
+            border-radius: 16px;
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .price-card.featured {
+            border-color: var(--accent);
+            position: relative;
+        }
+
+        .price-card.featured::before {
+            content: 'Most Popular';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent);
+            color: var(--bg);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 12px;
+        }
+
+        .price-card h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .price-card .price {
+            font-family: 'Instrument Serif', serif;
+            font-size: 40px;
+            margin-bottom: 4px;
+        }
+
+        .price-card .price-note {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+
+        .price-card ul {
+            list-style: none;
+            flex: 1;
+            margin-bottom: 24px;
+        }
+
+        .price-card li {
+            font-size: 14px;
+            padding: 8px 0;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .price-card li::before {
+            content: "✓";
+            color: var(--green);
+            flex-shrink: 0;
+        }
+
+        .price-card li.disabled {
+            opacity: 0.5;
+        }
+
+        .price-card li.disabled::before {
+            content: "✗";
+            color: var(--text-secondary);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--bg);
+        }
+
+        .btn-primary:hover {
+            background: #f0d05a;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text);
+            border: 1px solid #333;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent);
+        }
+
+        .faq {
+            max-width: 800px;
+            margin: 60px auto;
+            padding: 0 40px 60px;
+        }
+
+        .faq h2 {
+            font-family: 'Instrument Serif', serif;
+            font-size: 32px;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .faq-item {
+            border-bottom: 1px solid #1f1f24;
+            padding: 20px 0;
+        }
+
+        .faq-item h3 {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .faq-item p {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px;
+            border-top: 1px solid #1f1f24;
+        }
+
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        @media (max-width: 900px) {
+            .pricing-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+            .hero h1 { font-size: 36px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="index.html" class="logo">
+            <img src="https://berta.one/favicon.png" alt="Berta.one">
+            Berta1<span>Clarity</span>
+        </a>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="clarity-engine-v2.html">Launch App</a>
+            <a href="login.html">Login</a>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <h1>Simple, <span>transparent</span> pricing</h1>
+        <p>Free forever. Pay once for premium features. No subscriptions.</p>
+    </section>
+
+    <div class="ai-note">
+        <strong>AI not included</strong>
+        <p>You bring your own API key (OpenAI, Anthropic, or Google). We don't charge for AI - you pay the provider directly.</p>
+    </div>
+
+    <div class="pricing-grid">
+        <!-- Free -->
+        <div class="price-card">
+            <h2>Free</h2>
+            <div class="price">$0</div>
+            <div class="price-note">Free forever</div>
+            <ul>
+                <li>All 7 thinking modules</li>
+                <li>Bring your own AI key</li>
+                <li>Local browser storage</li>
+                <li>Markdown export</li>
+                <li>Up to 3 projects</li>
+                <li class="disabled">Cloud sync</li>
+                <li class="disabled">PDF reports</li>
+                <li class="disabled">AI Summary</li>
+            </ul>
+            <a href="clarity-engine-v2.html" class="btn btn-secondary">Get Started Free</a>
+        </div>
+
+        <!-- Starter -->
+        <div class="price-card">
+            <h2>Starter</h2>
+            <div class="price">$49</div>
+            <div class="price-note">One-time payment</div>
+            <ul>
+                <li>Everything in Free</li>
+                <li>Cloud sync across devices</li>
+                <li>PDF & Visual reports</li>
+                <li>Up to 10 projects</li>
+                <li>Email support</li>
+                <li>1 year of updates</li>
+                <li class="disabled">AI Summary reports</li>
+                <li class="disabled">Team features</li>
+            </ul>
+            <button class="btn btn-secondary" onclick="checkout('starter')">Get Starter</button>
+        </div>
+
+        <!-- Pro -->
+        <div class="price-card featured">
+            <h2>Pro</h2>
+            <div class="price">$99</div>
+            <div class="price-note">One-time payment</div>
+            <ul>
+                <li>Everything in Starter</li>
+                <li>AI Summary reports</li>
+                <li>Unlimited projects</li>
+                <li>Up to 3 devices</li>
+                <li>Priority email support</li>
+                <li>1 year of updates</li>
+                <li class="disabled">Team features</li>
+            </ul>
+            <button class="btn btn-primary" onclick="checkout('pro')">Get Pro</button>
+        </div>
+
+        <!-- Agency -->
+        <div class="price-card">
+            <h2>Agency</h2>
+            <div class="price">$249</div>
+            <div class="price-note">One-time payment</div>
+            <ul>
+                <li>Everything in Pro</li>
+                <li>Up to 10 team members</li>
+                <li>Shared projects</li>
+                <li>Team workspace</li>
+                <li>Unlimited devices</li>
+                <li>Priority support</li>
+                <li>Lifetime updates</li>
+            </ul>
+            <button class="btn btn-secondary" onclick="checkout('agency')">Get Agency</button>
+        </div>
+    </div>
+
+    <section class="faq">
+        <h2>Frequently Asked Questions</h2>
+
+        <div class="faq-item">
+            <h3>Do I need to pay for AI?</h3>
+            <p>No. You use your own API key from OpenAI, Anthropic (Claude), or Google (Gemini). You pay the AI provider directly - typically $0.01-0.05 per query. We don't charge anything for AI usage.</p>
+        </div>
+
+        <div class="faq-item">
+            <h3>Is this a subscription?</h3>
+            <p>No. All paid tiers are one-time payments. You get lifetime access to the features. Updates are included for 1 year (Starter/Pro) or lifetime (Agency).</p>
+        </div>
+
+        <div class="faq-item">
+            <h3>What happens after 1 year of updates?</h3>
+            <p>You keep using the app forever. After 1 year, you just won't receive new features unless you purchase again. Existing features continue to work.</p>
+        </div>
+
+        <div class="faq-item">
+            <h3>Can I upgrade later?</h3>
+            <p>Yes! You can upgrade from Free to any paid tier, or from Starter to Pro/Agency at any time. Just pay the difference.</p>
+        </div>
+
+        <div class="faq-item">
+            <h3>Is my data private?</h3>
+            <p>Yes. Your API keys are stored only in your browser - we never see them. With cloud sync, your project data is encrypted and stored securely. We don't sell or share your data.</p>
+        </div>
+
+        <div class="faq-item">
+            <h3>Do I need an account to use the free version?</h3>
+            <p>No. You can use all free features without creating an account. An account is only needed for cloud sync and other premium features.</p>
+        </div>
+    </section>
+
+    <footer>
+        <p>Questions? <a href="mailto:hello@berta.one">Contact us</a></p>
+    </footer>
+
+    <script>
+    async function checkout(tier) {
+        const btn = event.target;
+        btn.disabled = true;
+        btn.textContent = 'Loading...';
+
+        try {
+            const res = await fetch('/api/stripe/create-checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tier })
+            });
+
+            const data = await res.json();
+
+            if (data.url) {
+                window.location.href = data.url;
+            } else {
+                throw new Error(data.error || 'Failed to create checkout');
+            }
+        } catch (err) {
+            alert('Error: ' + err.message);
+            btn.disabled = false;
+            btn.textContent = `Get ${tier.charAt(0).toUpperCase() + tier.slice(1)}`;
+        }
+    }
+
+    // Check for cancelled payment
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('purchase') === 'cancelled') {
+        // Could show a message here
+    }
+    </script>
+</body>
+</html>
