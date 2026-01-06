@@ -1,15 +1,25 @@
 {
   "version": 2,
-  "buildCommand": null,
-  "outputDirectory": null,
+  "public": true,
+  "buildCommand": "npm ci",
+  "outputDirectory": "./",
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "nodejs18.x"
+    }
+  },
   "routes": [
     {
       "src": "/api/(.*)",
       "dest": "/api/$1"
     },
     {
-      "src": "/(.*)",
+      "src": "/(.+)",
       "dest": "/$1"
+    },
+    {
+      "src": "/",
+      "dest": "/index.html"
     }
   ],
   "headers": [

@@ -16,6 +16,8 @@
   "private": false,
   "scripts": {
     "dev": "vercel dev",
+    "build": "npm ci",
+    "start": "vercel dev",
     "deploy": "vercel --prod"
   },
   "dependencies": {
