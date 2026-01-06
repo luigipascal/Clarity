@@ -200,7 +200,7 @@ If Clarity helps you think better:
 
 - **Website:** [berta.one](https://berta.one)
 - **Live App:** [clarity.berta.one](https://clarity.berta.one)
-- **Twitter:** [@BertaOne](https://twitter.com/bertaone)
+- **X/Twitter:** [@berta_one](https://x.com/berta_one)
 - **Email:** hello@berta.one
 
 ---
