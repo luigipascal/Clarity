@@ -555,36 +555,12 @@
                 <div class="input-group">
                     <label class="input-label">Select Provider</label>
                     <select class="text-input" id="ai-provider" onchange="updateProvider(this.value)">
-                        <option value="llmco">LLM Cost Optimizer (Auto-Select Best Model)</option>
                         <option value="anthropic">Anthropic (Claude)</option>
                         <option value="openai">OpenAI (GPT)</option>
                         <option value="google">Google (Gemini)</option>
                     </select>
                 </div>
                 <div id="provider-status" style="margin-top:10px;padding:10px;border-radius:6px;font-size:12px"></div>
-            </div>
-
-            <div class="card" id="llmco-settings">
-                <div class="card-head"><span class="card-title">LLM Cost Optimizer</span><span class="card-badge" style="background:rgba(74,222,128,0.15);color:#4ade80">SAVE $$$</span></div>
-                <div class="input-group">
-                    <label class="input-label">License Key</label>
-                    <input type="password" class="text-input" id="llmco-key" placeholder="LLMCO-XXXX-XXXX-XXXX" onchange="saveKey('llmco')">
-                </div>
-                <div class="input-group">
-                    <label class="input-label">Mode</label>
-                    <select class="text-input" id="llmco-model" onchange="saveKey('llmco')">
-                        <option value="auto-optimize">Auto-Optimize (Cheapest for task)</option>
-                        <option value="gpt-4o-mini">GPT-4o Mini</option>
-                        <option value="gpt-4o">GPT-4o</option>
-                        <option value="claude-3-5-haiku">Claude 3.5 Haiku</option>
-                        <option value="claude-3-5-sonnet">Claude 3.5 Sonnet</option>
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label class="input-label">Server Endpoint</label>
-                    <input type="text" class="text-input" id="llmco-endpoint" placeholder="http://localhost:8765" value="http://localhost:8765" onchange="saveKey('llmco')">
-                </div>
-                <p style="font-size:11px;color:var(--text-muted)">Run <code style="background:var(--bg-elevated);padding:2px 5px;border-radius:3px">llm-cost-opt serve</code> to start the local server. <a href="https://llm.rondanini.net" target="_blank" style="color:var(--accent-clarity)">Get your license</a></p>
             </div>
 
             <div class="card" id="anthropic-settings">
@@ -693,11 +669,6 @@
 // ========== AI PROVIDER CONFIGURATION ==========
 const AI_CONFIG = {
     provider: localStorage.getItem('ai_provider') || 'anthropic',
-    llmco: {
-        key: localStorage.getItem('llmco_key') || '',
-        model: localStorage.getItem('llmco_model') || 'auto-optimize',
-        endpoint: localStorage.getItem('llmco_endpoint') || 'http://localhost:8765'
-    },
     anthropic: {
         key: localStorage.getItem('anthropic_key') || '',
         model: localStorage.getItem('anthropic_model') || 'claude-sonnet-4-20250514'
@@ -714,9 +685,6 @@ const AI_CONFIG = {
 
 function saveAIConfig() {
     localStorage.setItem('ai_provider', AI_CONFIG.provider);
-    localStorage.setItem('llmco_key', AI_CONFIG.llmco.key);
-    localStorage.setItem('llmco_model', AI_CONFIG.llmco.model);
-    localStorage.setItem('llmco_endpoint', AI_CONFIG.llmco.endpoint);
     localStorage.setItem('anthropic_key', AI_CONFIG.anthropic.key);
     localStorage.setItem('anthropic_model', AI_CONFIG.anthropic.model);
     localStorage.setItem('openai_key', AI_CONFIG.openai.key);
@@ -738,33 +706,7 @@ async function askClaude(systemPrompt, userPrompt, maxTokens = 1024) {
     try {
         let res, data;
 
-        if (provider === 'llmco') {
-            const endpoint = config.endpoint || 'http://localhost:8765';
-            res = await fetch(`${endpoint}/v1/chat`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${config.key}`
-                },
-                body: JSON.stringify({
-                    model: config.model,
-                    max_tokens: maxTokens,
-                    messages: [
-                        { role: 'system', content: systemPrompt },
-                        { role: 'user', content: userPrompt }
-                    ]
-                })
-            });
-            if (!res.ok) { const err = await res.json(); throw new Error(err.error || err.detail || 'LLMCO API error'); }
-            data = await res.json();
-            // Show cost savings in toast if available
-            if (data.savings_percent) {
-                toast('AI Response', `Saved ${data.savings_percent.toFixed(0)}% using ${data.model}`);
-            }
-            return data.choices[0].message.content;
-        }
-
-        else if (provider === 'anthropic') {
+        if (provider === 'anthropic') {
             res = await fetch('https://api.anthropic.com/v1/messages', {
                 method: 'POST',
                 headers: {
@@ -1532,9 +1474,6 @@ function generateVisualReport() {
 function initSettings() {
     // Load saved values into form
     document.getElementById('ai-provider').value = AI_CONFIG.provider;
-    document.getElementById('llmco-key').value = AI_CONFIG.llmco.key;
-    document.getElementById('llmco-model').value = AI_CONFIG.llmco.model;
-    document.getElementById('llmco-endpoint').value = AI_CONFIG.llmco.endpoint;
     document.getElementById('anthropic-key').value = AI_CONFIG.anthropic.key;
     document.getElementById('anthropic-model').value = AI_CONFIG.anthropic.model;
     document.getElementById('openai-key').value = AI_CONFIG.openai.key;
@@ -1554,10 +1493,6 @@ function updateProvider(provider) {
 function saveKey(provider) {
     AI_CONFIG[provider].key = document.getElementById(provider + '-key').value;
     AI_CONFIG[provider].model = document.getElementById(provider + '-model').value;
-    // LLMCO also has endpoint
-    if (provider === 'llmco') {
-        AI_CONFIG[provider].endpoint = document.getElementById('llmco-endpoint').value;
-    }
     saveAIConfig();
     updateProviderStatus();
 }
@@ -1566,18 +1501,12 @@ function updateProviderStatus() {
     const provider = AI_CONFIG.provider;
     const config = AI_CONFIG[provider];
     const status = document.getElementById('provider-status');
-    const providerName = provider === 'llmco' ? 'LLM Cost Optimizer' : provider.charAt(0).toUpperCase() + provider.slice(1);
 
     if (config.key) {
-        let info = `Using ${config.model}`;
-        if (provider === 'llmco') {
-            info += ` @ ${config.endpoint}`;
-        }
-        status.innerHTML = `<span style="color:var(--accent-collision)">✓ ${providerName} configured</span> — ${info}`;
+        status.innerHTML = `<span style="color:var(--accent-collision)">✓ ${provider.charAt(0).toUpperCase() + provider.slice(1)} configured</span> — Using ${config.model}`;
         status.style.background = 'rgba(74,222,128,0.1)';
     } else {
-        const keyType = provider === 'llmco' ? 'license key' : 'API key';
-        status.innerHTML = `<span style="color:var(--accent-resurrector)">✗ No ${keyType} set</span> — Add your ${providerName} ${keyType} below`;
+        status.innerHTML = `<span style="color:var(--accent-resurrector)">✗ No API key set</span> — Add your ${provider} key below`;
         status.style.background = 'rgba(248,113,113,0.1)';
     }
 }

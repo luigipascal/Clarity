@@ -2,7 +2,18 @@
   "name": "berta1clarity",
   "version": "1.0.0",
   "description": "AI-powered thinking tool with cloud sync",
-  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/luigipascal/Clarity.git"
+  },
+  "keywords": ["ai", "thinking", "productivity", "planning", "clarity"],
+  "author": "Luigi Pascal <luigi@rondanini.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/luigipascal/Clarity/issues"
+  },
+  "homepage": "https://clarity.berta.one",
+  "private": false,
   "scripts": {
     "dev": "vercel dev",
     "deploy": "vercel --prod"

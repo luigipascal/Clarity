@@ -14,3 +14,7 @@ node_modules/
 
 # Vercel
 .vercel/
+
+# Crawler artifacts (remove after use)
+crawl_output/
+crawl_result.json
