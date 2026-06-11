@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+<channel>
+  <title>Clarity</title>
+  <link>https://clarity.berta.one</link>
+  <description>Free focus management tool — organize tasks, track time, and create clarity before chaos.</description>
+  <language>en</language>
+  <lastBuildDate>Mon, 20 Apr 2026 12:00:00 GMT</lastBuildDate>
+    <item>
+      <title>Clarity — Free Focus Management</title>
+      <link>https://clarity.berta.one/</link>
+      <guid isPermaLink="true">https://clarity.berta.one/</guid>
+      <pubDate>Mon, 20 Apr 2026 12:00:00 GMT</pubDate>
+      <description><![CDATA[AI-powered thinking tool. Break down goals, surface hidden assumptions, and create clarity before you create chaos.]]></description>
+      <category>Tools</category>
+    </item>
+</channel>
+</rss>
